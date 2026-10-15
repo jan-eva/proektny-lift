@@ -1,0 +1,329 @@
+<meta charset="utf-8">
+<title>Проектный лифт</title>
+<meta name="theme-color" content="#4762B6">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(153,197,233,.20) 0, rgba(153,197,233,.20) 12%, transparent 12%) top left / 420px 420px no-repeat,
+        var(--paper);
+      font-family: "Proxima Nova", "Inter", "Segoe UI", Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.45;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; }
+    [hidden] { display: none !important; }
+
+    main { max-width: var(--max); margin: 0 auto; padding: 28px 28px 72px; }
+    section { animation: viewIn .4s ease both; }
+    @keyframes viewIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: 0 10px 26px rgba(39,58,148,.045); }
+
+    .btn { border: 0; border-radius: 13px; padding: 12px 18px; font-weight: 750; transition: transform .18s ease, box-shadow .18s ease, background .18s ease; display: inline-flex; align-items: center; justify-content: center; gap: 9px; text-decoration: none; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { color: var(--deep); background: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.16); }
+    .btn-secondary { color: #fff; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35); }
+    .btn-blue { color: #fff; background: var(--deep); box-shadow: 0 8px 22px rgba(39,58,148,.2); }
+    .btn-soft { color: var(--deep); background: rgba(71,98,182,.09); }
+    .btn-small { padding: 9px 13px; font-size: 14px; border-radius: 11px; }
+    .link-btn { border: 0; background: transparent; color: var(--deep); font-weight: 750; padding: 7px 0; text-decoration: none; display: inline-block; }
+
+    .tag { display: inline-flex; align-items: center; min-height: 25px; padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; background: rgba(71,98,182,.08); color: var(--deep); }
+    .tag.red { color: #A32128; background: rgba(219,31,38,.09); }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+    .eyebrow::before { content: ""; width: 24px; height: 3px; background: currentColor; border-radius: 3px; opacity: .75; }
+
+    /* Hero */
+    .hero { position: relative; overflow: hidden; min-height: 390px; margin-top: 18px; padding: 52px 54px; border-radius: var(--radius-xl); color: #fff; background: linear-gradient(135deg, var(--deep) 0%, var(--blue) 58%, var(--violet) 100%); box-shadow: var(--shadow); display: grid; grid-template-columns: 1.15fr .85fr; gap: 36px; align-items: center; }
+    .hero::before, .hero::after { content: ""; position: absolute; width: 460px; height: 86px; right: -120px; transform: rotate(-38deg); opacity: .9; }
+    .hero::before { top: 38px; background: var(--sky); }
+    .hero::after { top: 132px; background: var(--coral); }
+    .hero-copy { position: relative; z-index: 2; max-width: 750px; }
+    .hero h1 { margin: 16px 0 18px; font-size: clamp(32px, 4.2vw, 54px); line-height: 1.04; letter-spacing: -.035em; }
+    .hero p { margin: 0; max-width: 680px; color: rgba(255,255,255,.88); font-size: 18px; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .hero-orbit { position: relative; z-index: 2; min-height: 260px; display: grid; place-items: center; }
+    .lift-visual { position: relative; width: 240px; height: 240px; border-radius: 50%; background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.2); box-shadow: inset 0 0 0 26px rgba(255,255,255,.035); }
+    .lift-shaft { position: absolute; left: 50%; top: 32px; width: 90px; height: 172px; transform: translateX(-50%); border: 2px solid rgba(255,255,255,.55); border-top: 0; }
+    .lift-shaft::before, .lift-shaft::after { content: ""; position: absolute; top: -15px; width: 2px; height: 15px; background: rgba(255,255,255,.55); }
+    .lift-shaft::before { left: 24px; } .lift-shaft::after { right: 24px; }
+    .lift-car { position: absolute; left: 50%; top: 92px; width: 70px; height: 68px; transform: translateX(-50%); border-radius: 10px; background: #fff; color: var(--deep); display: grid; place-items: center; font-weight: 900; font-size: 26px; animation: lift 5.5s ease-in-out infinite; box-shadow: 0 12px 30px rgba(0,0,0,.22); }
+    @keyframes lift { 0%,100% { top: 118px; } 45%,55% { top: 56px; } }
+    .orbit-chip { position: absolute; padding: 9px 12px; border-radius: 999px; background: rgba(255,255,255,.95); color: var(--ink); font-size: 12px; font-weight: 800; box-shadow: 0 9px 20px rgba(0,0,0,.13); }
+    .orbit-chip.c1 { top: 8px; left: -10px; }
+    .orbit-chip.c2 { right: -30px; top: 88px; }
+    .orbit-chip.c3 { left: -16px; bottom: 14px; }
+
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-top: 18px; }
+    .stat-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 20px; min-height: 118px; position: relative; overflow: hidden; }
+    .stat-card::after { content: ""; position: absolute; right: -28px; bottom: -34px; width: 90px; height: 90px; border-radius: 50%; background: var(--accent, var(--sky)); opacity: .16; }
+    .stat-label { color: var(--muted); font-size: 13px; font-weight: 700; }
+    .stat-value { display: block; margin: 10px 0 4px; font-size: 32px; line-height: 1; font-weight: 850; letter-spacing: -.03em; }
+    .stat-delta { color: var(--green); font-size: 12px; font-weight: 750; }
+
+    .section-head { margin: 46px 0 18px; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .section-head h2 { margin: 0; font-size: 28px; letter-spacing: -.03em; }
+    .section-head p { margin: 7px 0 0; color: var(--muted); max-width: 620px; }
+
+    /* Как это работает */
+    .role-switch { display: inline-flex; padding: 4px; gap: 3px; border-radius: 13px; background: #EEF2F7; margin-top: 10px; }
+    .role-switch button { border: 0; background: transparent; color: var(--muted); padding: 9px 16px; border-radius: 10px; font-weight: 800; font-size: 14px; }
+    .role-switch button.active { background: #fff; color: var(--deep); box-shadow: 0 3px 10px rgba(39,58,148,.10); }
+    .steps-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-top: 18px; }
+    .step-card { padding: 20px; position: relative; }
+    .step-num { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; background: rgba(71,98,182,.1); color: var(--deep); font-weight: 900; margin-bottom: 12px; }
+    .step-card h3 { margin: 0 0 7px; font-size: 16px; }
+    .step-card p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    /* Преимущества */
+    .advantage-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; margin-top: 18px; }
+    .advantage-col { padding: 24px; }
+    .advantage-col h3 { margin: 0 0 16px; font-size: 19px; }
+    .advantage-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 13px; }
+    .advantage-list li { display: flex; gap: 11px; align-items: flex-start; font-size: 14px; color: var(--ink); }
+    .advantage-list li::before { content: "✓"; flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: var(--green); font-size: 11px; margin-top: 1px; }
+
+    /* Задачи */
+    .task-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-top: 18px; }
+    .task-card { padding: 20px; text-decoration: none; color: inherit; display: block; transition: .18s ease; }
+    .task-card:hover { transform: translateY(-2px); border-color: rgba(71,98,182,.3); }
+    .task-card h3 { margin: 9px 0 7px; font-size: 17px; line-height: 1.28; }
+    .task-card p { margin: 0; color: var(--muted); font-size: 13px; }
+    .task-card .meta { margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .source-badges { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .source-badge { padding: 10px 14px; border-radius: 12px; background: #fff; border: 1px solid var(--line); font-size: 13px; font-weight: 700; color: var(--muted); }
+
+    /* Что можно найти */
+    .entity-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-top: 18px; }
+    .entity-card { padding: 20px; text-decoration: none; color: inherit; display: block; transition: .18s ease; }
+    .entity-card:hover { transform: translateY(-2px); }
+    .entity-card .icon { width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; background: rgba(71,98,182,.1); color: var(--deep); font-size: 19px; font-weight: 900; margin-bottom: 13px; }
+    .entity-card h3 { margin: 0 0 6px; font-size: 16px; }
+    .entity-card p { margin: 0; color: var(--muted); font-size: 12px; }
+
+    /* Teaser sections */
+    .teaser { margin-top: 46px; padding: 32px; display: grid; grid-template-columns: 1.3fr .7fr; gap: 28px; align-items: center; }
+    .teaser h2 { margin: 0 0 10px; font-size: 24px; }
+    .teaser p { margin: 0; color: var(--muted); }
+    .teaser-visual { display: flex; flex-wrap: wrap; gap: 9px; justify-content: flex-end; }
+    .sticky { padding: 11px 13px; border-radius: 5px; box-shadow: 0 7px 18px rgba(0,0,0,.14); color: var(--ink); font-size: 12px; font-weight: 800; transform: rotate(var(--rot,1deg)); }
+    .sticky.ask { background: #FF9E9E; } .sticky.give { background: #83D8E5; } .sticky.done { background: #CBEA91; }
+    .heat-preview { display: grid; grid-template-rows: repeat(7,9px); grid-auto-flow: column; grid-auto-columns: 9px; gap: 3px; }
+    .heat-cell { width: 9px; height: 9px; border-radius: 2px; background: #EDF1F5; }
+
+    .prototype-note { margin-top: 46px; padding: 17px 20px; border-radius: 16px; background: rgba(221,229,232,.55); color: var(--muted); font-size: 12px; text-align: center; }
+    .site-footer { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 24px; justify-content: space-between; color: var(--muted); font-size: 13px; }
+    .site-footer nav { display: flex; gap: 18px; flex-wrap: wrap; }
+    .site-footer a { color: var(--muted); text-decoration: none; font-weight: 700; }
+    .site-footer a:hover { color: var(--deep); }
+
+    @media (max-width: 1120px) {
+      .hero { grid-template-columns: 1fr .6fr; }
+      .steps-grid, .task-grid, .entity-grid { grid-template-columns: repeat(2,1fr); }
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 900px) {
+      main { padding: 20px 18px 55px; }
+      .hero { grid-template-columns: 1fr; padding: 38px 28px; }
+      .hero-orbit { display: none; }
+      .advantage-grid { grid-template-columns: 1fr; }
+      .teaser { grid-template-columns: 1fr; }
+      .teaser-visual { justify-content: flex-start; }
+    }
+    @media (max-width: 620px) {
+      .steps-grid, .task-grid, .entity-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 34px; }
+    }
+  </style>
+<div class="top-ribbon" aria-hidden="true"></div>
+  <header class="site-topbar">
+    <div class="site-topbar-inner">
+      <a class="site-brand" href="index.html" aria-label="Проектный лифт, на главную">
+        <span class="rsv-mark" aria-label="Россия — страна возможностей" style="position:relative;width:82px;height:48px;display:inline-block;font-style:italic;font-size:8px;line-height:1;transform:rotate(-1deg)">
+          <span style="position:absolute;top:0;right:13px;padding:4px 7px 3px;background:#F3F3F4;color:#171717;transform:skew(-9deg);box-shadow:0 2px 5px rgba(30,39,66,.09)"><b style="display:inline-block;transform:skew(9deg);font-weight:600">РОССИЯ —</b></span>
+          <span style="position:absolute;top:16px;right:7px;padding:4px 7px 3px;background:var(--deep);color:#fff;transform:skew(-9deg);box-shadow:0 2px 5px rgba(30,39,66,.09)"><b style="display:inline-block;transform:skew(9deg);font-weight:600">СТРАНА</b></span>
+          <span style="position:absolute;top:32px;padding:4px 7px 3px;background:#D83358;color:#fff;transform:skew(-9deg);box-shadow:0 2px 5px rgba(30,39,66,.09)"><b style="display:inline-block;transform:skew(9deg);font-weight:600">ВОЗМОЖНОСТЕЙ</b></span>
+        </span>
+        <span class="site-product"><strong>Проектный лифт</strong><small>задачи · эксперты · результат</small></span>
+      </a>
+      <nav class="site-nav" aria-label="Разделы сайта">
+        <a href="index.html" data-site-link="index">Главная</a>
+        <a href="proektny-lift.html" data-site-link="proektny-lift">Проектный лифт</a>
+        <a href="stena-obmena.html" data-site-link="stena-obmena">Стена обмена</a>
+        <a href="zakazchik.html" data-site-link="zakazchik">Заказчики</a>
+      </nav>
+      <div class="site-actions">
+        <a class="site-login-btn" href="proektny-lift.html">Войти</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">от государственной задачи к измеримому результату</span>
+        <h1>Там, где задача государства становится вашим следующим карьерным шагом</h1>
+        <p>Лидеры России, которые уже работают в органах власти и корпорациях, публикуют реальные задачи и приглашают участников программы «Лидеры России» к их решению. Через совместную работу в проектах видно, кто готов к постоянной роли и более серьёзным задачам.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="proektny-lift.html#tasks">Найти задачу <span aria-hidden="true">→</span></a>
+          <a class="btn btn-secondary" href="proektny-lift.html" id="postTaskLink">Опубликовать задачу</a>
+          <a class="btn btn-secondary" href="stena-obmena.html">Открыть Стену обмена</a>
+          <a class="btn btn-secondary" href="#start">Стать участником</a>
+        </div>
+      </div>
+      <div class="hero-orbit" aria-hidden="true">
+        <div class="lift-visual">
+          <div class="lift-shaft"></div>
+          <div class="lift-car">↑</div>
+          <div class="orbit-chip c1">Задача</div>
+          <div class="orbit-chip c2">Команда</div>
+          <div class="orbit-chip c3">Результат</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="stats-grid" aria-label="Показатели платформы">
+      <article class="stat-card" style="--accent:var(--sky)"><span class="stat-label">Задач в банке</span><strong class="stat-value">286</strong><span class="stat-delta">+18 за месяц</span></article>
+      <article class="stat-card" style="--accent:var(--blue)"><span class="stat-label">Сейчас в работе</span><strong class="stat-value">74</strong><span class="stat-delta">82% без просрочек</span></article>
+      <article class="stat-card" style="--accent:var(--violet)"><span class="stat-label">Задач решено</span><strong class="stat-value">419</strong><span class="stat-delta">127 подтверждено эффектом</span></article>
+      <article class="stat-card" style="--accent:var(--coral)"><span class="stat-label">Экспертов</span><strong class="stat-value">3 842</strong><span class="stat-delta">636 готовы к проекту</span></article>
+    </div>
+
+    <section id="start">
+      <div class="section-head">
+        <div><h2>Как это работает</h2><p>Один и тот же цикл выглядит по-разному для Эксперта и Заказчика — переключите, чтобы увидеть свою сторону.</p></div>
+        <div class="role-switch" role="tablist" aria-label="Сторона процесса">
+          <button class="active" data-role-tab="expert" role="tab" aria-selected="true">Я — Эксперт</button>
+          <button data-role-tab="customer" role="tab" aria-selected="false">Я — Заказчик</button>
+        </div>
+      </div>
+      <div class="steps-grid" id="stepsExpert">
+        <article class="card step-card"><span class="step-num">1</span><h3>Пройдите аудит профиля</h3><p>Самооценка сопоставляется с подтверждёнными проектами, рекомендациями и результатами.</p></article>
+        <article class="card step-card"><span class="step-num">2</span><h3>Найдите задачу по совпадению</h3><p>Подбор объясним: компетенции, опыт, доступность и регион — а не просто список вакансий.</p></article>
+        <article class="card step-card"><span class="step-num">3</span><h3>Соберите команду и возьмите задачу</h3><p>Задача закрепляется за командой после подтверждения заказчиком, а не за одним исполнителем.</p></article>
+        <article class="card step-card"><span class="step-num">4</span><h3>Доведите до результата</h3><p>Вклад фиксируется в профиле — публично и по каждой контрольной точке, а не только в резюме.</p></article>
+      </div>
+      <div class="steps-grid" id="stepsCustomer" hidden>
+        <article class="card step-card"><span class="step-num">1</span><h3>Сформулируйте задачу</h3><p>Карточка на 7 вопросов и привязка к официальному источнику — наказу, нацпроекту, стратегии.</p></article>
+        <article class="card step-card"><span class="step-num">2</span><h3>Опубликуйте и получите отклики</h3><p>Задача проходит четыре проверки зрелости прежде, чем попасть в банк задач.</p></article>
+        <article class="card step-card"><span class="step-num">3</span><h3>Выберите команду</h3><p>Сравнивайте подтверждённый опыт, рейтинги и реальную доступность кандидатов.</p></article>
+        <article class="card step-card"><span class="step-num">4</span><h3>Примите результат</h3><p>Эффект подтверждается через 3–12 месяцев после внедрения, а не сразу после сдачи.</p></article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><div><h2>Преимущества</h2><p>Платформа устроена так, чтобы решать проблемы обычных рейтингов и бирж задач.</p></div></div>
+      <div class="advantage-grid">
+        <div class="card advantage-col">
+          <h3>Для Экспертов</h3>
+          <ul class="advantage-list">
+            <li>Каждая задача трассируется к официальному источнику — наказу, нацпроекту или региональной стратегии.</li>
+            <li>Работаете в команде с понятными ролями, а не в одиночку поверх чужого резюме.</li>
+            <li>Вклад фиксируется в публичном календаре активности — результаты, экспертизы, наставничество.</li>
+            <li>Прозрачный статусный цикл задачи — от публикации до подтверждённого эффекта, без сюрпризов.</li>
+          </ul>
+        </div>
+        <div class="card advantage-col">
+          <h3>Для Заказчиков</h3>
+          <ul class="advantage-list">
+            <li>Получаете проверенную команду с подтверждёнными проектами, а не набор резюме.</li>
+            <li>Видите календарь реального вклада, а не только самооценку в анкете.</li>
+            <li>Задача проходит четыре проверки зрелости до публикации — законность, согласованность, трассируемость, ресурсность.</li>
+            <li>Эффект проверяется через 3–12 месяцев после внедрения, а не считается сразу после сдачи.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><div><h2>Реальные задачи</h2><p>Примеры из банка задач — с источником, сроком и заказчиком.</p></div><a class="link-btn" href="proektny-lift.html#tasks">Все задачи →</a></div>
+      <div class="task-grid">
+        <a class="card task-card" href="proektny-lift.html#tasks"><div class="tag-row"><span class="tag">Промышленность</span><span class="tag">Северо-Запад</span></div><h3>Локализация судоремонта и запуск пилота с предприятием</h3><p>Подготовить программу локализации судоремонта в регионе и довести её до пилотного запуска на одном предприятии.</p><div class="meta">Источник: региональная промышленная стратегия · 6 месяцев</div></a>
+        <a class="card task-card" href="proektny-lift.html#tasks"><div class="tag-row"><span class="tag">Здравоохранение</span><span class="tag">Сибирь</span></div><h3>Маршрут сопровождения пациентов после сложных операций</h3><p>Создать единый маршрут взаимодействия пациента, поликлиники, стационара и социальной службы.</p><div class="meta">Источник: региональная программа здравоохранения · 5 месяцев</div></a>
+        <a class="card task-card" href="proektny-lift.html#tasks"><div class="tag-row"><span class="tag red">Срочно</span><span class="tag">Юг</span></div><h3>Система раннего выявления несанкционированных свалок</h3><p>Объединить спутниковые снимки, обращения жителей и выездные проверки в единый цикл реагирования.</p><div class="meta">Источник: региональный план экологических мероприятий · 16 недель</div></a>
+      </div>
+      <div class="source-badges" aria-label="Источники задач">
+        <span class="source-badge">Национальные проекты</span>
+        <span class="source-badge">Региональные стратегии</span>
+        <span class="source-badge">Наказы жителей</span>
+        <span class="source-badge">Государственные программы</span>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><div><h2>Что можно найти на платформе</h2><p>Четыре раздела, которые вместе образуют полный цикл задачи.</p></div></div>
+      <div class="entity-grid">
+        <a class="card entity-card" href="proektny-lift.html#tasks"><div class="icon">⊞</div><h3>Задачи</h3><p>Банк задач с источником, KPI и проверками зрелости.</p></a>
+        <a class="card entity-card" href="proektny-lift.html#experts"><div class="icon">★</div><h3>Эксперты</h3><p>Профили с проверенными проектами и календарём вклада.</p></a>
+        <a class="card entity-card" href="zakazchik.html"><div class="icon">⬡</div><h3>Заказчики</h3><p>Ведомства, компании и лидеры с публичной статистикой.</p></a>
+        <a class="card entity-card" href="stena-obmena.html"><div class="icon">⇄</div><h3>Стена обмена</h3><p>Обмен экспертизой, ресурсами и наставничеством вне формальных задач.</p></a>
+      </div>
+    </section>
+
+    <section class="card teaser">
+      <div><span class="eyebrow" style="color:var(--deep)">сообщество</span><h2>Стена обмена: помощь, которая не ждёт официальной задачи</h2><p>Прошу · Даю · Сделано — участники находят нужную экспертизу, делятся ресурсами и превращают обмен внутри сообщества в проекты с измеримым результатом, не дожидаясь, пока это станет официальной задачей заказчика.</p><a class="btn btn-blue btn-small" style="margin-top:16px" href="stena-obmena.html">Открыть Стену обмена →</a></div>
+      <div class="teaser-visual" aria-hidden="true">
+        <div class="sticky ask" style="--rot:-2deg">Нужен эксперт по ГЧП</div>
+        <div class="sticky give" style="--rot:1deg">Экспертиза в аналитике</div>
+        <div class="sticky done" style="--rot:2deg">Пилот запущен</div>
+      </div>
+    </section>
+
+    <section class="card teaser">
+      <div><span class="eyebrow" style="color:var(--deep)">метрика «строитель»</span><h2>Вклад виден не по должности, а по делу</h2><p>419 задач решено, 636 экспертов готовы к новому проекту — за каждой цифрой стоит подтверждённый результат, контрольная точка или наставническая сессия в публичном календаре активности эксперта.</p><a class="btn btn-blue btn-small" style="margin-top:16px" href="proektny-lift.html#experts">Посмотреть профиль эксперта →</a></div>
+      <div class="heat-preview" id="heroHeat" aria-hidden="true"></div>
+    </section>
+
+    <div class="prototype-note">Учебный интерактивный прототип для магистерского диплома. Данные, организации, рейтинги и проекты вымышлены; интерфейс не является официальным ресурсом АНО «Россия — страна возможностей».</div>
+
+    <footer class="site-footer">
+      <span>© Проектный лифт — демонстрационный прототип</span>
+      <nav aria-label="Карта сайта">
+        <a href="index.html">Главная</a>
+        <a href="proektny-lift.html">Проектный лифт</a>
+        <a href="stena-obmena.html">Стена обмена</a>
+        <a href="zakazchik.html">Заказчики</a>
+      </nav>
+    </footer>
+  </main>
+
+  <script src="assets/site-nav.js"></script>
+  <script>
+    document.querySelectorAll('[data-role-tab]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-role-tab]').forEach(b => { b.classList.toggle('active', b === btn); b.setAttribute('aria-selected', b === btn ? 'true' : 'false'); });
+        document.getElementById('stepsExpert').hidden = btn.dataset.roleTab !== 'expert';
+        document.getElementById('stepsCustomer').hidden = btn.dataset.roleTab !== 'customer';
+      });
+    });
+
+    document.getElementById('postTaskLink').addEventListener('click', () => {
+      try { localStorage.setItem('rsvRole', 'customer'); } catch (_) {}
+    });
+
+    (function generateHeatPreview() {
+      const host = document.getElementById('heroHeat');
+      let seed = 271828;
+      const rand = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
+      let html = '';
+      for (let i = 0; i < 140; i++) {
+        const r = rand();
+        let bg = '#EDF1F5';
+        if (r > .93) bg = 'var(--deep)'; else if (r > .80) bg = 'rgba(71,98,182,.88)'; else if (r > .61) bg = 'rgba(71,98,182,.58)'; else if (r > .38) bg = 'rgba(153,197,233,.72)';
+        html += `<span class="heat-cell" style="background:${bg}"></span>`;
+      }
+      host.innerHTML = html;
+    })();
+
+    RSVNav.initTopbar('index');
+  </script>

@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#4762B6">
+  <title>Заказчики — Проектный лифт</title>
+  <link rel="stylesheet" href="assets/site.css">
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(153,197,233,.20) 0, rgba(153,197,233,.20) 12%, transparent 12%) top left / 420px 420px no-repeat,
+        var(--paper);
+      font-family: "Proxima Nova", "Inter", "Segoe UI", Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.45;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; }
+    [hidden] { display: none !important; }
+
+    main { max-width: var(--max); margin: 0 auto; padding: 28px 28px 72px; }
+    .view { animation: viewIn .34s ease both; }
+    @keyframes viewIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    .card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: 0 10px 26px rgba(39,58,148,.045); }
+
+    .btn { border: 0; border-radius: 13px; padding: 11px 16px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: .18s ease; text-decoration: none; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { color: var(--deep); background: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.16); }
+    .btn-blue { color: #fff; background: var(--deep); box-shadow: 0 8px 22px rgba(39,58,148,.2); }
+    .btn-soft { color: var(--deep); background: rgba(71,98,182,.09); }
+    .btn-small { padding: 9px 12px; font-size: 14px; border-radius: 11px; }
+    .link-btn { border: 0; background: transparent; color: var(--deep); font-weight: 750; padding: 7px 0; text-decoration: none; display: inline-block; }
+
+    .tag { display: inline-flex; align-items: center; min-height: 25px; padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; background: rgba(71,98,182,.08); color: var(--deep); }
+    .tag.green { color: var(--green); background: rgba(37,131,91,.10); }
+    .tag.gray { color: var(--muted); background: #F0F3F7; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
+
+    .page-title { position: relative; overflow: hidden; padding: 28px 30px; border-radius: var(--radius-xl); background: #fff; border: 1px solid var(--line); margin-top: 18px; }
+    .page-title::after { content: ""; position: absolute; width: 240px; height: 68px; right: -58px; top: 18px; transform: rotate(-34deg); background: linear-gradient(90deg, var(--blue), var(--violet), var(--coral)); opacity: .95; }
+    .page-title h1 { font-size: 34px; margin: 16px 0 0; letter-spacing: -.03em; }
+    .page-title p { margin: 7px 0 0; color: var(--muted); max-width: 760px; }
+    .page-title > div { position: relative; z-index: 1; max-width: 820px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--deep); font-size: 12px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+    .eyebrow::before { content: ""; width: 24px; height: 3px; background: currentColor; border-radius: 3px; opacity: .75; }
+
+    .section-head { margin: 38px 0 18px; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
+    .section-head h2 { margin: 0; font-size: 26px; letter-spacing: -.03em; }
+    .section-head p { margin: 7px 0 0; color: var(--muted); }
+
+    .directory-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+    .directory-card { padding: 18px; }
+    .person-top { display: flex; align-items: center; gap: 12px; }
+    .person-avatar { width: 52px; height: 52px; border-radius: 15px; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--blue), var(--violet)); font-weight: 900; flex: 0 0 auto; }
+    .directory-card h3 { margin: 0; font-size: 16px; }
+    .directory-card p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .person-stats { display: flex; gap: 14px; margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--line); font-size: 12px; }
+    .person-stats strong { display: block; font-size: 17px; }
+
+    .profile-hero { margin-top: 18px; padding: 26px; display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 22px; align-items: center; }
+    .profile-avatar { width: 88px; height: 88px; border-radius: 24px; display: grid; place-items: center; color: #fff; font-size: 26px; font-weight: 900; box-shadow: 0 18px 35px rgba(71,98,182,.24); }
+    .profile-copy h2 { margin: 0; font-size: 27px; }
+    .profile-copy p { margin: 6px 0 0; color: var(--muted); max-width: 620px; }
+    .profile-score { min-width: 210px; padding: 18px; border-radius: 18px; background: linear-gradient(135deg, rgba(153,197,233,.28), rgba(96,90,166,.09)); }
+    .profile-score small { color: var(--muted); text-transform: uppercase; letter-spacing: .07em; font-size: 11px; }
+    .profile-score strong { display: block; margin: 7px 0 3px; font-size: 28px; }
+    .profile-score span { color: var(--muted); font-size: 12px; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-top: 18px; }
+    .stat-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 18px; }
+    .stat-label { color: var(--muted); font-size: 12px; font-weight: 700; }
+    .stat-value { display: block; margin: 9px 0 3px; font-size: 30px; line-height: 1; font-weight: 850; letter-spacing: -.03em; }
+
+    .task-list { display: grid; gap: 12px; margin-top: 18px; }
+    .task-card { position: relative; padding: 18px; border-radius: var(--radius-lg); background: #fff; border: 1px solid var(--line); box-shadow: 0 10px 24px rgba(39,58,148,.05); text-decoration: none; color: inherit; display: block; transition: .18s ease; }
+    .task-card:hover { transform: translateY(-2px); border-color: rgba(71,98,182,.3); }
+    .task-card h3 { margin: 9px 0 6px; font-size: 17px; }
+    .task-card p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .empty-state { padding: 40px; text-align: center; color: var(--muted); }
+
+    .prototype-note { margin-top: 38px; padding: 17px 20px; border-radius: 16px; background: rgba(221,229,232,.55); color: var(--muted); font-size: 12px; text-align: center; }
+
+    @media (max-width: 900px) {
+      main { padding: 20px 18px 55px; }
+      .directory-grid { grid-template-columns: repeat(2,1fr); }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .profile-hero { grid-template-columns: auto 1fr; }
+      .profile-score { grid-column: 1 / -1; }
+    }
+    @media (max-width: 620px) {
+      .directory-grid { grid-template-columns: 1fr; }
+      .page-title { padding: 22px 20px; }
+      .page-title h1 { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-ribbon" aria-hidden="true"></div>
+  <header class="site-topbar">
+    <div class="site-topbar-inner">
+      <a class="site-brand" href="index.html" aria-label="Проектный лифт, на главную">
+        <span class="rsv-mark" aria-label="Россия — страна возможностей" style="position:relative;width:82px;height:48px;display:inline-block;font-style:italic;font-size:8px;line-height:1;transform:rotate(-1deg)">
+          <span style="position:absolute;top:0;right:13px;padding:4px 7px 3px;background:#F3F3F4;color:#171717;transform:skew(-9deg);box-shadow:0 2px 5px rgba(30,39,66,.09)"><b style="display:inline-block;transform:skew(9deg);font-weight:600">РОССИЯ —</b></span>
+          <span style="position:absolute;top:16px;right:7px;padding:4px 7px 3px;background:var(--deep);color:#fff;transform:skew(-9deg);box-shadow:0 2px 5px rgba(30,39,66,.09)"><b style="display:inline-block;transform:skew(9deg);font-weight:600">СТРАНА</b></span>
+          <span style="position:absolute;top:32px;padding:4px 7px 3px;background:#D83358;color:#fff;transform:skew(-9deg);box-shadow:0 2px 5px rgba(30,39,66,.09)"><b style="display:inline-block;transform:skew(9deg);font-weight:600">ВОЗМОЖНОСТЕЙ</b></span>
+        </span>
+        <span class="site-product"><strong>Заказчики</strong><small>ведомства · компании · лидеры</small></span>
+      </a>
+      <nav class="site-nav" aria-label="Разделы сайта">
+        <a href="index.html" data-site-link="index">Главная</a>
+        <a href="proektny-lift.html" data-site-link="proektny-lift">Проектный лифт</a>
+        <a href="stena-obmena.html" data-site-link="stena-obmena">Стена обмена</a>
+        <a href="zakazchik.html" data-site-link="zakazchik">Заказчики</a>
+      </nav>
+      <div class="site-actions">
+        <a class="site-login-btn" href="proektny-lift.html">Войти</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="view" id="view-catalog">
+      <div class="page-title"><div><span class="eyebrow">заказчики</span><h1>Ведомства, компании и лидеры, разместившие задачи</h1><p>Каждая задача в банке трассируется к официальному источнику — национальному проекту, региональной стратегии или наказу жителей — и имеет понятного заказчика. У каждого заказчика есть публичная страница со статистикой и списком задач.</p></div></div>
+      <div class="section-head"><div><h2>Каталог заказчиков</h2><p>Откройте страницу заказчика, чтобы увидеть все его задачи и подтверждённый эффект.</p></div></div>
+      <div class="directory-grid" id="customerCatalog"></div>
+    </section>
+
+    <section class="view" id="view-profile" hidden>
+      <div class="card profile-hero">
+        <div class="profile-avatar" id="profileAvatar" style="background:linear-gradient(135deg,var(--blue),var(--violet))"></div>
+        <div class="profile-copy">
+          <div class="tag-row" id="profileTags"></div>
+          <h2 id="profileName"></h2>
+          <p id="profileBio"></p>
+        </div>
+        <div class="profile-score"><small>Рейтинг заказчика</small><strong id="profileRating"></strong><span id="profileRatingNote">по подтверждённым проектам</span></div>
+      </div>
+
+      <div class="stats-grid">
+        <article class="stat-card"><span class="stat-label">Задач опубликовано</span><strong class="stat-value" id="statTasks"></strong></article>
+        <article class="stat-card"><span class="stat-label">Поднято экспертов</span><strong class="stat-value" id="statLifted"></strong></article>
+        <article class="stat-card"><span class="stat-label">Создано лифтов</span><strong class="stat-value" id="statLifts"></strong></article>
+      </div>
+
+      <div class="section-head"><div><h2>Задачи этого заказчика</h2><p>Открыты в банке задач — с полной карточкой, источником и проверками зрелости.</p></div></div>
+      <div class="task-list" id="profileTasks"></div>
+      <div class="card empty-state" id="profileTasksEmpty" hidden><strong>В демонстрации пока нет открытых карточек задач этого заказчика.</strong></div>
+    </section>
+
+    <div class="prototype-note">Учебный интерактивный прототип для магистерского диплома. Данные, организации, рейтинги и проекты вымышлены; интерфейс не является официальным ресурсом АНО «Россия — страна возможностей».</div>
+  </main>
+
+  <script src="assets/site-nav.js"></script>
+  <script>
+    const customers = [
+      {id:'komitet-promyshlennosti', name:'Комитет промышленной политики региона', type:'РОИВ', sector:'Промышленность', bio:'Отвечает за реализацию региональной промышленной стратегии и запуск пилотов локализации производства совместно с предприятиями.', rating:'4,8', reviews:14, stats:{tasks:9,lifted:11,lifts:4}, taskIds:['PL-0318']},
+      {id:'administraciya-gorokruga', name:'Администрация городского округа', type:'Муниципалитет', sector:'Городская среда', bio:'Отвечает за городские сервисы и исполнение наказов жителей; публикует задачи по сокращению сроков и цифровизации процессов.', rating:'4,6', reviews:9, stats:{tasks:5,lifted:6,lifts:2}, taskIds:['PL-0342']},
+      {id:'minzdrav-regiona', name:'Министерство здравоохранения региона', type:'РОИВ', sector:'Здравоохранение', bio:'Формирует региональную программу здравоохранения и ищет управленцев для межведомственных маршрутов пациентов.', rating:'4,9', reviews:21, stats:{tasks:7,lifted:9,lifts:3}, taskIds:['PL-0291']},
+      {id:'federalny-proektny-ofis', name:'Федеральный проектный офис', type:'ФОИВ', sector:'Образование', bio:'Координирует федеральный проект «Профессионалитет» и подбирает экспертов для оценки эффекта проектного обучения.', rating:'4,5', reviews:7, stats:{tasks:12,lifted:15,lifts:5}, taskIds:['PL-0377']},
+      {id:'minprirody-regiona', name:'Министерство природных ресурсов региона', type:'РОИВ', sector:'Экология', bio:'Отвечает за региональный план экологических мероприятий и контроль за несанкционированными свалками.', rating:'4,7', reviews:11, stats:{tasks:6,lifted:8,lifts:2}, taskIds:['PL-0360']},
+      {id:'otraslevoy-centr', name:'Отраслевой центр компетенций', type:'Корпорация', sector:'Технологии', bio:'Собирает и тиражирует проверенные сценарии цифровой трансформации для организаций реального сектора.', rating:'4,8', reviews:18, stats:{tasks:8,lifted:10,lifts:4}, taskIds:['PL-0388']}
+    ];
+
+    const taskSummaries = {
+      'PL-0318': {title:'Локализация судоремонта и запуск пилота с предприятием', summary:'Подготовить программу локализации судоремонта в регионе и довести её до пилотного запуска на одном предприятии.', term:'6 месяцев'},
+      'PL-0342': {title:'Сократить срок согласования сезонных городских маршрутов', summary:'Пересобрать процесс согласования маршрутов так, чтобы сократить цикл с 45 до 20 рабочих дней.', term:'12 недель'},
+      'PL-0291': {title:'Маршрут сопровождения пациентов после сложных операций', summary:'Создать единый маршрут взаимодействия пациента, поликлиники, стационара и социальной службы.', term:'5 месяцев'},
+      'PL-0377': {title:'Модель оценки эффекта проектного обучения в колледжах', summary:'Разработать измеримую модель оценки и проверить её на выборке образовательных организаций.', term:'4 месяца'},
+      'PL-0360': {title:'Система раннего выявления несанкционированных свалок', summary:'Объединить спутниковые снимки, обращения жителей и выездные проверки в единый цикл реагирования.', term:'16 недель'},
+      'PL-0388': {title:'Библиотека типовых сценариев внедрения отечественного ПО', summary:'Собрать проверенные сценарии миграции и сделать инструмент подбора по отрасли и масштабу организации.', term:'7 месяцев'}
+    };
+
+    const typeColor = {'ФОИВ':'var(--blue)','РОИВ':'var(--violet)','Муниципалитет':'var(--muted)','Корпорация':'var(--amber)'};
+    const esc = v => String(v).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+
+    function initials(name) {
+      return name.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    }
+
+    function renderCatalog() {
+      document.getElementById('customerCatalog').innerHTML = customers.map(c => `
+        <article class="card directory-card">
+          <div class="person-top"><div class="person-avatar">${initials(c.name)}</div><div><h3><a href="zakazchik.html#${c.id}" style="color:inherit;text-decoration:none">${esc(c.name)}</a></h3><p>${esc(c.sector)}</p></div></div>
+          <div class="tag-row" style="margin-top:12px"><span class="tag" style="color:#fff;background:${typeColor[c.type] || 'var(--muted)'}">${esc(c.type)}</span><span class="tag green">★ ${c.rating}</span></div>
+          <div class="person-stats"><div><strong>${c.stats.tasks}</strong>задач</div><div><strong>${c.stats.lifted}</strong>поднято</div><div><strong>${c.stats.lifts}</strong>лифтов</div></div>
+          <a class="link-btn" href="zakazchik.html#${c.id}" style="margin-top:10px">Открыть страницу →</a>
+        </article>`).join('');
+    }
+
+    function renderProfile(customer) {
+      document.getElementById('view-catalog').hidden = true;
+      document.getElementById('view-profile').hidden = false;
+      document.getElementById('profileAvatar').textContent = initials(customer.name);
+      document.getElementById('profileTags').innerHTML = `<span class="tag" style="color:#fff;background:${typeColor[customer.type] || 'var(--muted)'}">${esc(customer.type)}</span><span class="tag gray">${esc(customer.sector)}</span>`;
+      document.getElementById('profileName').textContent = customer.name;
+      document.getElementById('profileBio').textContent = customer.bio;
+      document.getElementById('profileRating').textContent = `★ ${customer.rating}`;
+      document.getElementById('profileRatingNote').textContent = `${customer.reviews} подтверждённых отзывов`;
+      document.getElementById('statTasks').textContent = customer.stats.tasks;
+      document.getElementById('statLifted').textContent = customer.stats.lifted;
+      document.getElementById('statLifts').textContent = customer.stats.lifts;
+
+      const list = customer.taskIds.map(id => taskSummaries[id] ? {id, ...taskSummaries[id]} : null).filter(Boolean);
+      document.getElementById('profileTasks').innerHTML = list.map(t => `
+        <a class="task-card" href="proektny-lift.html#tasks">
+          <span class="tag gray">${esc(t.id)}</span><span class="tag">${esc(t.term)}</span>
+          <h3>${esc(t.title)}</h3><p>${esc(t.summary)}</p>
+        </a>`).join('');
+      document.getElementById('profileTasksEmpty').hidden = list.length !== 0;
+    }
+
+    function renderCatalogView() {
+      document.getElementById('view-profile').hidden = true;
+      document.getElementById('view-catalog').hidden = false;
+    }
+
+    function route() {
+      const org = decodeURIComponent(location.hash.replace('#',''));
+      if (org) {
+        const customer = customers.find(c => c.id === org);
+        if (customer) { renderProfile(customer); return; }
+      }
+      renderCatalogView();
+    }
+
+    function init() {
+      renderCatalog();
+      route();
+      window.addEventListener('hashchange', route);
+      RSVNav.initTopbar('zakazchik');
+    }
+    init();
+  </script>
+</body>
+</html>

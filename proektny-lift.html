@@ -1,0 +1,1786 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#4762B6">
+  <title>Проектный лифт — интерактивный прототип</title>
+  <link rel="stylesheet" href="assets/site.css">
+  <style>
+    :root {
+      --sky: #99C5E9;
+      --blue: #4762B6;
+      --violet: #605AA6;
+      --coral: #DC5A5C;
+      --red: #DB1F26;
+      --deep: #273A94;
+      --mist: #DDE5E8;
+      --paper: #F7F9FC;
+      --white: #FFFFFF;
+      --ink: #1E2742;
+      --muted: #65708B;
+      --line: #E2E7EF;
+      --green: #25835B;
+      --amber: #B76B12;
+      --shadow: 0 16px 44px rgba(39, 58, 148, .10);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --max: 1440px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(153,197,233,.20) 0, rgba(153,197,233,.20) 12%, transparent 12%) top left / 420px 420px no-repeat,
+        var(--paper);
+      font-family: "Proxima Nova", "Inter", "Segoe UI", Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.45;
+    }
+
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; }
+    [hidden] { display: none !important; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    :focus-visible {
+      outline: 3px solid rgba(39, 58, 148, .35);
+      outline-offset: 3px;
+    }
+
+    .top-ribbon {
+      position: fixed;
+      z-index: 80;
+      top: 0;
+      right: 0;
+      width: 170px;
+      height: 12px;
+      background: linear-gradient(90deg, var(--blue) 0 35%, var(--violet) 35% 68%, var(--coral) 68%);
+      clip-path: polygon(14% 0,100% 0,100% 100%,0 100%);
+      pointer-events: none;
+    }
+
+    .app-header {
+      position: sticky;
+      z-index: 70;
+      top: 0;
+      background: rgba(255,255,255,.94);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(71,98,182,.12);
+    }
+
+    .header-inner {
+      max-width: var(--max);
+      min-height: 78px;
+      margin: 0 auto;
+      padding: 12px 28px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .brand-block {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      text-decoration: none;
+      min-width: 235px;
+    }
+
+    .rsv-mark {
+      position: relative;
+      width: 88px;
+      height: 51px;
+      flex: 0 0 auto;
+      font-style: italic;
+      font-size: 8.5px;
+      line-height: 1;
+      letter-spacing: .02em;
+      transform: rotate(-1deg);
+    }
+
+    .rsv-mark span {
+      position: absolute;
+      right: 0;
+      padding: 4px 8px 3px;
+      transform: skew(-9deg);
+      white-space: nowrap;
+      box-shadow: 0 2px 5px rgba(30,39,66,.09);
+    }
+    .rsv-mark span > b { display: inline-block; transform: skew(9deg); font-weight: 600; }
+    .rsv-mark .m1 { top: 0; right: 14px; color: #171717; background: #F3F3F4; }
+    .rsv-mark .m2 { top: 17px; right: 8px; color: #fff; background: var(--deep); }
+    .rsv-mark .m3 { top: 34px; color: #fff; background: #D83358; }
+
+    .product-name {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.05;
+    }
+    .product-name strong { font-size: 19px; letter-spacing: -.02em; }
+    .product-name small { margin-top: 5px; color: var(--muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+
+    .main-nav {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-btn {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 10px 13px;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: .2s ease;
+    }
+    .nav-btn:hover { color: var(--deep); background: rgba(71,98,182,.07); }
+    .nav-btn.active { color: var(--deep); background: rgba(71,98,182,.11); }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .role-select {
+      min-width: 126px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 12px;
+      padding: 9px 34px 9px 11px;
+    }
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: #fff;
+      display: inline-grid;
+      place-items: center;
+      color: var(--deep);
+      position: relative;
+    }
+    .icon-btn::after {
+      content: "";
+      position: absolute;
+      top: 7px;
+      right: 7px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--red);
+      border: 2px solid #fff;
+    }
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: linear-gradient(135deg, var(--blue), var(--violet));
+      font-weight: 800;
+      box-shadow: 0 8px 20px rgba(71,98,182,.25);
+    }
+
+    main {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 28px 28px 72px;
+    }
+
+    .view { animation: viewIn .34s ease both; }
+    @keyframes viewIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 390px;
+      padding: 52px 54px;
+      border-radius: var(--radius-xl);
+      color: #fff;
+      background: linear-gradient(135deg, var(--deep) 0%, var(--blue) 58%, var(--violet) 100%);
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 36px;
+      align-items: center;
+    }
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 460px;
+      height: 86px;
+      right: -120px;
+      transform: rotate(-38deg);
+      opacity: .9;
+    }
+    .hero::before { top: 38px; background: var(--sky); }
+    .hero::after { top: 132px; background: var(--coral); }
+    .hero-copy { position: relative; z-index: 2; max-width: 750px; }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: inherit;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 3px;
+      background: currentColor;
+      border-radius: 3px;
+      opacity: .75;
+    }
+    .hero h1 {
+      margin: 16px 0 18px;
+      font-size: clamp(38px, 5vw, 68px);
+      line-height: .99;
+      letter-spacing: -.045em;
+      max-width: 780px;
+    }
+    .hero p { margin: 0; max-width: 680px; color: rgba(255,255,255,.86); font-size: 19px; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+
+    .btn {
+      border: 0;
+      border-radius: 13px;
+      padding: 12px 18px;
+      font-weight: 750;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      text-decoration: none;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { color: var(--deep); background: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.16); }
+    .btn-secondary { color: #fff; background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.35); }
+    .btn-blue { color: #fff; background: var(--deep); box-shadow: 0 8px 22px rgba(39,58,148,.2); }
+    .btn-soft { color: var(--deep); background: rgba(71,98,182,.09); }
+    .btn-danger { color: #fff; background: var(--red); }
+    .btn-small { padding: 9px 12px; font-size: 14px; border-radius: 11px; }
+
+    .hero-orbit {
+      position: relative;
+      z-index: 2;
+      min-height: 270px;
+      display: grid;
+      place-items: center;
+    }
+    .lift-visual {
+      position: relative;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.09);
+      border: 1px solid rgba(255,255,255,.2);
+      box-shadow: inset 0 0 0 26px rgba(255,255,255,.035);
+    }
+    .lift-shaft {
+      position: absolute;
+      left: 50%;
+      top: 34px;
+      width: 94px;
+      height: 180px;
+      transform: translateX(-50%);
+      border: 2px solid rgba(255,255,255,.55);
+      border-top: 0;
+    }
+    .lift-shaft::before,
+    .lift-shaft::after {
+      content: "";
+      position: absolute;
+      top: -15px;
+      width: 2px;
+      height: 15px;
+      background: rgba(255,255,255,.55);
+    }
+    .lift-shaft::before { left: 25px; }
+    .lift-shaft::after { right: 25px; }
+    .lift-car {
+      position: absolute;
+      left: 50%;
+      top: 98px;
+      width: 74px;
+      height: 72px;
+      transform: translateX(-50%);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--deep);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 28px;
+      animation: lift 5.5s ease-in-out infinite;
+      box-shadow: 0 12px 30px rgba(0,0,0,.22);
+    }
+    @keyframes lift { 0%,100% { top: 125px; } 45%,55% { top: 60px; } }
+    .orbit-chip {
+      position: absolute;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.95);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 800;
+      box-shadow: 0 9px 20px rgba(0,0,0,.13);
+    }
+    .orbit-chip.c1 { top: 12px; left: -12px; }
+    .orbit-chip.c2 { right: -34px; top: 94px; }
+    .orbit-chip.c3 { left: -20px; bottom: 19px; }
+
+    .section-head {
+      margin: 38px 0 18px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .section-head h2, .page-title h1 { margin: 0; letter-spacing: -.03em; }
+    .section-head h2 { font-size: 28px; }
+    .section-head p, .page-title p { margin: 7px 0 0; color: var(--muted); }
+    .link-btn {
+      border: 0;
+      background: transparent;
+      color: var(--deep);
+      font-weight: 750;
+      padding: 7px 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .stat-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      min-height: 128px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::after {
+      content: "";
+      position: absolute;
+      right: -28px;
+      bottom: -34px;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: var(--accent, var(--sky));
+      opacity: .16;
+    }
+    .stat-label { color: var(--muted); font-size: 13px; font-weight: 700; }
+    .stat-value { display: block; margin: 10px 0 4px; font-size: 34px; line-height: 1; font-weight: 850; letter-spacing: -.035em; }
+    .stat-delta { color: var(--green); font-size: 12px; font-weight: 750; }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(300px, .75fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 10px 26px rgba(39,58,148,.045);
+    }
+
+    .task-list { display: grid; gap: 12px; }
+    .task-card {
+      position: relative;
+      padding: 20px;
+      overflow: hidden;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    .task-card:hover { transform: translateY(-2px); border-color: rgba(71,98,182,.34); box-shadow: var(--shadow); }
+    .task-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: var(--task-accent, var(--blue));
+    }
+    .task-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 25px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      background: rgba(71,98,182,.08);
+      color: var(--deep);
+    }
+    .tag.green { color: var(--green); background: rgba(37,131,91,.10); }
+    .tag.amber { color: var(--amber); background: rgba(183,107,18,.11); }
+    .tag.red { color: #A32128; background: rgba(219,31,38,.09); }
+    .tag.gray { color: var(--muted); background: #F0F3F7; }
+    .task-card h3 { margin: 0; font-size: 19px; line-height: 1.25; letter-spacing: -.015em; }
+    .task-card p { margin: 9px 0 0; color: var(--muted); font-size: 14px; }
+    .match-score {
+      min-width: 65px;
+      text-align: center;
+      border-radius: 15px;
+      padding: 10px 8px;
+      color: var(--deep);
+      background: rgba(153,197,233,.25);
+      font-weight: 900;
+    }
+    .match-score small { display: block; margin-top: 2px; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+    .task-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 10px;
+      margin-top: 17px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+    .meta-label { display: block; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+    .meta-value { display: block; margin-top: 4px; font-size: 13px; font-weight: 750; }
+    .rating { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 750; }
+    .rating .stars { color: #F2A700; letter-spacing: -2px; }
+    .rating .count { color: var(--muted); font-weight: 600; }
+    .task-reason {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      color: var(--deep);
+      background: linear-gradient(90deg, rgba(153,197,233,.22), rgba(96,90,166,.07));
+      font-size: 12px;
+    }
+    .task-reason strong { font-weight: 850; }
+    .task-open {
+      position: absolute;
+      inset: 0;
+      border: 0;
+      background: transparent;
+      color: transparent;
+      z-index: 1;
+    }
+    .task-card a, .task-card button:not(.task-open) { position: relative; z-index: 2; }
+
+    .progress-card { padding: 22px; }
+    .progress-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .progress-head h3 { margin: 0; font-size: 19px; }
+    .progress-head p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
+    .progress-ring {
+      --p: 64;
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--blue) calc(var(--p) * 1%), #EAEFF5 0);
+      flex: 0 0 auto;
+      position: relative;
+    }
+    .progress-ring::before { content: ""; width: 56px; height: 56px; background: #fff; border-radius: 50%; }
+    .progress-ring span { position: absolute; font-weight: 850; font-size: 15px; }
+    .mini-timeline { margin-top: 22px; display: grid; gap: 14px; }
+    .mini-row { display: grid; grid-template-columns: 92px 1fr 34px; gap: 9px; align-items: center; font-size: 12px; }
+    .mini-bar { height: 8px; border-radius: 999px; background: #E9EDF3; overflow: hidden; }
+    .mini-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--violet)); }
+    .next-step { margin-top: 20px; padding: 14px; border-radius: 14px; background: #F5F7FB; }
+    .next-step small { color: var(--muted); }
+    .next-step strong { display: block; margin-top: 4px; }
+
+    .leader-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+    .person-card { padding: 18px; }
+    .person-top { display: flex; gap: 12px; align-items: center; }
+    .person-avatar { width: 52px; height: 52px; border-radius: 15px; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--blue), var(--violet)); font-weight: 900; }
+    .person-card h3 { margin: 0; font-size: 16px; }
+    .person-card p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .person-stats { display: flex; gap: 14px; margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--line); font-size: 12px; }
+    .person-stats strong { display: block; font-size: 16px; }
+
+    .page-title {
+      position: relative;
+      overflow: hidden;
+      padding: 28px 30px;
+      border-radius: var(--radius-xl);
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+    .page-title::after {
+      content: "";
+      position: absolute;
+      width: 240px;
+      height: 68px;
+      right: -58px;
+      top: 18px;
+      transform: rotate(-34deg);
+      background: linear-gradient(90deg, var(--blue), var(--violet), var(--coral));
+      opacity: .95;
+    }
+    .page-title h1 { font-size: 34px; }
+    .page-title > div { position: relative; z-index: 1; max-width: 760px; }
+
+    .filters {
+      margin-top: 18px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: minmax(250px, 1.4fr) repeat(3, minmax(150px,.55fr)) auto;
+      gap: 10px;
+      align-items: center;
+    }
+    .field {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 12px;
+      min-height: 44px;
+      padding: 10px 12px;
+      color: var(--ink);
+    }
+    .search-wrap { position: relative; }
+    .search-wrap .field { padding-left: 40px; }
+    .search-wrap::before { content: "⌕"; position: absolute; left: 14px; top: 8px; color: var(--muted); font-size: 22px; transform: rotate(-15deg); }
+    .result-count { margin: 16px 2px 12px; color: var(--muted); font-size: 13px; }
+    .task-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+    .task-grid .task-card { min-height: 287px; }
+    .empty-state { padding: 50px; text-align: center; color: var(--muted); }
+
+    .project-header {
+      margin-top: 18px;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: minmax(0,1.2fr) auto;
+      gap: 22px;
+    }
+    .project-title-row { display: flex; align-items: flex-start; gap: 14px; }
+    .project-icon { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; background: rgba(71,98,182,.11); color: var(--deep); font-size: 25px; }
+    .project-header h2 { margin: 0; font-size: 25px; letter-spacing: -.025em; }
+    .project-header p { margin: 6px 0 0; color: var(--muted); }
+    .project-rating-grid { display: flex; gap: 10px; align-items: stretch; }
+    .rating-box { min-width: 126px; padding: 12px 14px; border-radius: 14px; background: #F6F8FB; }
+    .rating-box small { display: block; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .07em; }
+    .rating-box strong { display: block; margin-top: 5px; font-size: 18px; }
+
+    .project-layout { margin-top: 18px; display: grid; grid-template-columns: minmax(0,1fr) 310px; gap: 18px; }
+    .workspace { padding: 18px; min-height: 540px; }
+    .workspace-toolbar { display: flex; justify-content: space-between; gap: 15px; align-items: center; margin-bottom: 18px; }
+    .segmented { display: inline-flex; padding: 4px; gap: 3px; border-radius: 12px; background: #EEF2F7; }
+    .segmented button { border: 0; background: transparent; color: var(--muted); padding: 8px 12px; border-radius: 9px; font-weight: 750; }
+    .segmented button.active { background: #fff; color: var(--deep); box-shadow: 0 3px 10px rgba(39,58,148,.10); }
+
+    .kanban { display: grid; grid-template-columns: repeat(4,minmax(190px,1fr)); gap: 11px; overflow-x: auto; padding-bottom: 8px; }
+    .kanban-column { min-width: 190px; padding: 11px; border-radius: 14px; background: #F4F6F9; border: 1px solid transparent; transition: .15s; }
+    .kanban-column.drag-over { border-color: var(--blue); background: rgba(153,197,233,.16); }
+    .kanban-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 11px; font-size: 12px; font-weight: 850; text-transform: uppercase; letter-spacing: .05em; }
+    .kanban-count { min-width: 23px; height: 23px; padding: 0 6px; border-radius: 999px; display: grid; place-items: center; background: #fff; color: var(--muted); }
+    .kanban-cards { min-height: 390px; display: grid; align-content: start; gap: 9px; }
+    .kanban-card { padding: 12px; border-radius: 12px; background: #fff; border: 1px solid var(--line); box-shadow: 0 7px 16px rgba(39,58,148,.055); cursor: grab; }
+    .kanban-card:active { cursor: grabbing; }
+    .kanban-card h4 { margin: 7px 0 9px; font-size: 13px; line-height: 1.32; }
+    .kanban-card footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 10px; }
+    .tiny-avatar { width: 25px; height: 25px; border-radius: 50%; display: grid; place-items: center; background: var(--deep); color: #fff; font-size: 9px; font-weight: 800; }
+
+    .gantt-wrap { overflow-x: auto; }
+    .gantt { min-width: 900px; display: grid; grid-template-columns: 210px repeat(12, minmax(45px,1fr)); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+    .gantt > div { min-height: 46px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); display: flex; align-items: center; padding: 6px; font-size: 11px; }
+    .gantt .g-head { justify-content: center; color: var(--muted); background: #F5F7FA; font-weight: 750; }
+    .gantt .g-name { padding: 9px 12px; font-weight: 700; background: #fff; }
+    .gantt .g-cell { position: relative; padding: 0; background: repeating-linear-gradient(90deg, transparent, transparent calc(100% - 1px), rgba(226,231,239,.8) calc(100% - 1px), rgba(226,231,239,.8) 100%); }
+    .g-bar { position: absolute; z-index: 2; height: 20px; top: 13px; border-radius: 7px; color: #fff; display: flex; align-items: center; padding: 0 7px; white-space: nowrap; font-size: 9px; font-weight: 800; box-shadow: 0 4px 10px rgba(39,58,148,.16); }
+    .g-bar.blue { background: var(--blue); }
+    .g-bar.violet { background: var(--violet); }
+    .g-bar.coral { background: var(--coral); }
+    .g-bar.green { background: var(--green); }
+
+    .side-panel { display: grid; gap: 14px; }
+    .side-card { padding: 18px; }
+    .side-card h3 { margin: 0 0 13px; font-size: 16px; }
+    .milestone { display: grid; grid-template-columns: 24px 1fr; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+    .milestone:first-of-type { border-top: 0; }
+    .milestone-dot { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: rgba(37,131,91,.12); color: var(--green); font-size: 12px; font-weight: 900; }
+    .milestone.pending .milestone-dot { background: rgba(183,107,18,.11); color: var(--amber); }
+    .milestone strong { display: block; font-size: 13px; }
+    .milestone small { color: var(--muted); }
+    .risk { padding: 12px; border-radius: 12px; background: rgba(220,90,92,.09); color: #823A3C; font-size: 12px; }
+    .risk strong { display: block; margin-bottom: 4px; }
+
+    .profile-hero {
+      margin-top: 18px;
+      padding: 26px;
+      display: grid;
+      grid-template-columns: auto minmax(0,1fr) auto;
+      gap: 22px;
+      align-items: center;
+    }
+    .profile-avatar { width: 96px; height: 96px; border-radius: 26px; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg,var(--blue),var(--violet)); font-size: 30px; font-weight: 900; box-shadow: 0 18px 35px rgba(71,98,182,.24); }
+    .profile-copy h2 { margin: 0; font-size: 27px; }
+    .profile-copy p { margin: 6px 0 12px; color: var(--muted); }
+    .skill-row { display: flex; flex-wrap: wrap; gap: 7px; }
+    .profile-score { min-width: 220px; padding: 18px; border-radius: 18px; background: linear-gradient(135deg, rgba(153,197,233,.28), rgba(96,90,166,.09)); }
+    .profile-score small { color: var(--muted); text-transform: uppercase; letter-spacing: .07em; }
+    .profile-score strong { display: block; margin: 7px 0 5px; font-size: 30px; }
+
+    .profile-layout { margin-top: 18px; display: grid; grid-template-columns: minmax(0,1.35fr) minmax(300px,.65fr); gap: 18px; align-items: start; }
+    .activity-card { padding: 22px; overflow: hidden; }
+    .activity-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; }
+    .activity-head h3 { margin: 0; }
+    .activity-head p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+    .heat-scroll { overflow-x: auto; padding-bottom: 8px; }
+    .heatmap {
+      margin-top: 20px;
+      display: grid;
+      grid-template-rows: repeat(7, 12px);
+      grid-auto-flow: column;
+      grid-auto-columns: 12px;
+      gap: 4px;
+      width: max-content;
+      min-width: 100%;
+    }
+    .heat-cell { width: 12px; height: 12px; border-radius: 3px; background: #EDF1F5; }
+    .heat-cell.l1 { background: rgba(153,197,233,.72); }
+    .heat-cell.l2 { background: rgba(71,98,182,.58); }
+    .heat-cell.l3 { background: rgba(71,98,182,.88); }
+    .heat-cell.l4 { background: var(--deep); }
+    .heat-legend { display: flex; justify-content: flex-end; align-items: center; gap: 5px; margin-top: 10px; color: var(--muted); font-size: 10px; }
+    .legend-cell { width: 11px; height: 11px; border-radius: 3px; }
+    .activity-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-top: 20px; }
+    .activity-stat { padding: 13px; border-radius: 13px; background: #F6F8FB; }
+    .activity-stat strong { display: block; font-size: 22px; }
+    .activity-stat span { color: var(--muted); font-size: 11px; }
+
+    .audit-card { padding: 20px; }
+    .audit-card h3 { margin: 0; }
+    .audit-card > p { color: var(--muted); font-size: 12px; }
+    .audit-row { margin-top: 14px; }
+    .audit-line { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; font-size: 12px; }
+    .audit-track { height: 8px; background: #EAEFF4; border-radius: 999px; overflow: hidden; }
+    .audit-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,var(--blue),var(--violet)); }
+    .development-note { margin-top: 18px; padding: 13px; border-radius: 13px; background: rgba(183,107,18,.09); color: #74480D; font-size: 12px; }
+
+    .directory-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+    .directory-card { padding: 18px; }
+    .directory-card .person-avatar { width: 58px; height: 58px; }
+    .availability { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; color: var(--green); font-size: 11px; font-weight: 750; }
+    .availability::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+    .drawer-backdrop {
+      position: fixed;
+      z-index: 90;
+      inset: 0;
+      background: rgba(17,26,52,.42);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: .25s ease;
+    }
+    .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+    .drawer {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: min(720px, 100%);
+      min-height: 100%;
+      background: #fff;
+      transform: translateX(100%);
+      transition: .28s ease;
+      box-shadow: -24px 0 60px rgba(17,26,52,.18);
+    }
+    .drawer-backdrop.open .drawer { transform: none; }
+    .drawer-head { position: sticky; top: 0; z-index: 3; display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; padding: 23px 26px; background: rgba(255,255,255,.96); backdrop-filter: blur(16px); border-bottom: 1px solid var(--line); }
+    .drawer-head h2 { margin: 7px 0 0; font-size: 25px; line-height: 1.15; }
+    .close-btn { width: 40px; height: 40px; border: 1px solid var(--line); background: #fff; border-radius: 50%; font-size: 22px; }
+    .drawer-body { padding: 24px 26px 110px; }
+    .detail-summary { color: var(--muted); font-size: 15px; }
+    .detail-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 11px; margin: 20px 0; }
+    .detail-box { padding: 14px; border-radius: 14px; background: #F5F7FA; }
+    .detail-box small { display: block; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; font-size: 10px; }
+    .detail-box strong { display: block; margin-top: 5px; }
+    .question-list { display: grid; gap: 10px; }
+    .question { padding: 15px; border: 1px solid var(--line); border-radius: 14px; }
+    .question b { display: block; margin-bottom: 5px; color: var(--deep); font-size: 12px; }
+    .question p { margin: 0; font-size: 14px; }
+    .maturity { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; margin-top: 12px; }
+    .check { display: flex; align-items: center; gap: 9px; padding: 10px; border-radius: 12px; background: rgba(37,131,91,.08); color: var(--green); font-size: 12px; font-weight: 750; }
+    .check::before { content: "✓"; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: var(--green); }
+    .customer-box { margin-top: 12px; padding: 15px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-radius: 14px; background: linear-gradient(135deg, rgba(153,197,233,.19), rgba(96,90,166,.06)); }
+    .drawer-footer { position: fixed; right: 0; bottom: 0; z-index: 4; width: min(720px,100%); padding: 15px 26px; display: flex; justify-content: space-between; align-items: center; gap: 14px; border-top: 1px solid var(--line); background: rgba(255,255,255,.97); backdrop-filter: blur(14px); }
+
+    .rating-modal {
+      position: fixed;
+      z-index: 110;
+      inset: 0;
+      background: rgba(17,26,52,.48);
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      opacity: 0;
+      pointer-events: none;
+      transition: .2s;
+    }
+    .rating-modal.open { opacity: 1; pointer-events: auto; }
+    .rating-sheet { width: min(520px,100%); padding: 24px; border-radius: 24px; background: #fff; box-shadow: 0 30px 80px rgba(17,26,52,.25); transform: translateY(12px) scale(.98); transition: .2s; }
+    .rating-modal.open .rating-sheet { transform: none; }
+    .rating-sheet h2 { margin: 0; }
+    .rating-sheet > p { color: var(--muted); }
+    .rating-line { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; padding: 13px 0; border-top: 1px solid var(--line); }
+    .rating-line:first-of-type { margin-top: 14px; }
+    .star-picker { display: flex; gap: 4px; }
+    .star-picker button { border: 0; background: transparent; color: #CFD5DF; font-size: 27px; padding: 0; }
+    .star-picker button.active { color: #F2A700; }
+    .rating-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+
+    .toast {
+      position: fixed;
+      z-index: 130;
+      left: 50%;
+      bottom: 24px;
+      transform: translate(-50%, 20px);
+      opacity: 0;
+      pointer-events: none;
+      padding: 12px 16px;
+      border-radius: 13px;
+      background: var(--ink);
+      color: #fff;
+      box-shadow: 0 14px 35px rgba(17,26,52,.25);
+      transition: .22s;
+      font-size: 14px;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%,0); }
+
+    .prototype-note {
+      margin-top: 38px;
+      padding: 17px 20px;
+      border-radius: 16px;
+      background: rgba(221,229,232,.55);
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+
+    .stat-delta.warn { color: #A32128; }
+    .stat-delta.neutral { color: var(--muted); }
+    .dashboard-item-actions {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .candidate-card .person-top { align-items: flex-start; }
+    .candidate-card .candidate-copy { min-width: 0; }
+    .candidate-card .candidate-copy h3 { margin: 0; }
+    .candidate-card .candidate-copy p { margin-top: 3px; }
+    .candidate-card .person-avatar { flex: 0 0 auto; }
+    .queue-card .match-score { min-width: 72px; }
+    .queue-card .task-reason { background: linear-gradient(90deg, rgba(220,90,92,.11), rgba(96,90,166,.06)); }
+    .portfolio-list { display: grid; gap: 10px; margin-top: 18px; }
+    .portfolio-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 12px;
+      border-radius: 12px;
+      background: #F5F7FB;
+      font-size: 12px;
+    }
+    .portfolio-row span { color: var(--muted); }
+    .portfolio-row strong { text-align: right; }
+    .project-summary-card h3, .milestone-card h3 { margin: 0; font-size: 16px; line-height: 1.3; }
+    .project-summary-card p, .milestone-card p { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+    .project-summary-card .mini-bar { margin-top: 15px; }
+    .project-summary-card .person-stats, .milestone-card .person-stats { justify-content: space-between; }
+    .milestone-card { position: relative; overflow: hidden; }
+    .milestone-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 100%;
+      background: var(--task-accent, var(--blue));
+    }
+    .role-context {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 9px;
+      color: rgba(255,255,255,.82);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .role-context::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--sky); }
+
+    @media (max-width: 1180px) {
+      .header-inner { grid-template-columns: auto auto; }
+      .main-nav { grid-column: 1 / -1; grid-row: 2; order: 3; overflow-x: auto; justify-content: flex-start; padding-top: 4px; }
+      .hero { grid-template-columns: 1fr .55fr; }
+      .project-header { grid-template-columns: 1fr; }
+      .project-rating-grid { flex-wrap: wrap; }
+      .kanban { grid-template-columns: repeat(4, 240px); }
+      .filters { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .search-wrap { grid-column: 1 / -1; }
+      .filters .btn { width: 100%; }
+    }
+
+    @media (max-width: 900px) {
+      .header-inner { padding: 10px 18px; gap: 14px; }
+      .header-actions .role-select { min-width: 118px; max-width: 150px; }
+      main { padding: 20px 18px 55px; }
+      .hero { grid-template-columns: 1fr; padding: 38px 30px; }
+      .hero-orbit { display: none; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+      .content-grid, .project-layout, .profile-layout { grid-template-columns: 1fr; }
+      .leader-grid, .directory-grid { grid-template-columns: repeat(2,1fr); }
+      .task-grid { grid-template-columns: 1fr; }
+      .profile-hero { grid-template-columns: auto 1fr; }
+      .profile-score { grid-column: 1 / -1; }
+      .project-layout { gap: 14px; }
+    }
+
+    @media (max-width: 620px) {
+      .brand-block { min-width: auto; }
+      .product-name small { display: none; }
+      .product-name strong { font-size: 16px; }
+      .rsv-mark { width: 76px; transform: scale(.88) rotate(-1deg); transform-origin: left center; margin-right: -8px; }
+      .header-actions .icon-btn { display: none; }
+      .role-select { min-width: 106px; max-width: 118px; padding: 8px 28px 8px 9px; font-size: 12px; }
+      .header-inner { grid-template-columns: 1fr auto; }
+      .main-nav { gap: 2px; }
+      .nav-btn { padding: 9px 10px; font-size: 13px; }
+      .hero { min-height: 0; padding: 32px 23px; border-radius: 22px; }
+      .hero h1 { font-size: 40px; }
+      .hero p { font-size: 16px; }
+      .hero-actions .btn { width: 100%; }
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 9px; }
+      .stat-card { padding: 16px; min-height: 110px; }
+      .stat-value { font-size: 28px; }
+      .section-head { align-items: flex-start; }
+      .section-head h2 { font-size: 24px; }
+      .task-meta { grid-template-columns: 1fr 1fr; }
+      .task-meta > div:last-child { grid-column: 1 / -1; }
+      .leader-grid, .directory-grid { grid-template-columns: 1fr; }
+      .page-title { padding: 24px 20px; }
+      .page-title::after { opacity: .25; }
+      .filters { grid-template-columns: 1fr; }
+      .search-wrap { grid-column: auto; }
+      .project-header { padding: 18px; }
+      .project-rating-grid { display: grid; grid-template-columns: repeat(3,1fr); }
+      .rating-box { min-width: 0; padding: 10px; }
+      .rating-box strong { font-size: 15px; }
+      .profile-hero { grid-template-columns: 1fr; text-align: center; }
+      .profile-avatar { margin: 0 auto; }
+      .skill-row { justify-content: center; }
+      .activity-stats { grid-template-columns: repeat(2,1fr); }
+      .detail-grid, .maturity { grid-template-columns: 1fr; }
+      .drawer-head, .drawer-body { padding-left: 18px; padding-right: 18px; }
+      .drawer-footer { padding: 12px 18px; }
+      .drawer-footer .rating { display: none; }
+      .drawer-footer .btn { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-ribbon" aria-hidden="true"></div>
+  <header class="site-topbar">
+    <div class="site-topbar-inner">
+      <a class="site-brand" href="index.html" aria-label="Проектный лифт, на главную">
+        <span class="rsv-mark" aria-label="Россия — страна возможностей">
+          <span class="m1"><b>РОССИЯ —</b></span>
+          <span class="m2"><b>СТРАНА</b></span>
+          <span class="m3"><b>ВОЗМОЖНОСТЕЙ</b></span>
+        </span>
+        <span class="site-product"><strong>Проектный лифт</strong><small>задачи · эксперты · результат</small></span>
+      </a>
+      <nav class="site-nav" aria-label="Разделы сайта">
+        <a href="index.html" data-site-link="index">Главная</a>
+        <a href="proektny-lift.html" data-site-link="proektny-lift">Проектный лифт</a>
+        <a href="stena-obmena.html" data-site-link="stena-obmena">Стена обмена</a>
+        <a href="zakazchik.html" data-site-link="zakazchik">Заказчики</a>
+      </nav>
+      <div class="site-actions">
+        <label class="sr-only" for="globalRoleSelect">Роль</label>
+        <select class="role-select" id="globalRoleSelect">
+          <option value="expert">Я — Эксперт</option>
+          <option value="customer">Я — Заказчик</option>
+          <option value="curator">Я — Куратор</option>
+        </select>
+        <div class="site-avatar" title="Алексей Петров">АП</div>
+      </div>
+    </div>
+  </header>
+  <div class="site-subbar">
+    <div class="site-subbar-inner">
+      <nav class="main-nav" aria-label="Основная навигация">
+        <button class="nav-btn active" data-view="dashboard">Обзор</button>
+        <button class="nav-btn" data-view="tasks">Банк задач</button>
+        <button class="nav-btn" data-view="projects">Проекты</button>
+        <button class="nav-btn" data-view="experts">Эксперты</button>
+        <button class="nav-btn" data-view="customers">Заказчики</button>
+      </nav>
+    </div>
+  </div>
+
+  <main>
+    <section class="view" id="view-dashboard">
+      <div class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow" id="heroEyebrow">от государственной задачи к измеримому результату</span>
+          <h1 id="heroTitle">Поднимай проекты. Расти вместе с ними.</h1>
+          <p id="heroRoleText">Найдите задачу, которая соответствует вашему опыту, соберите команду и превратите идею в работающий публичный результат.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" id="primaryHeroAction" data-go="tasks">Подобрать задачу <span aria-hidden="true">→</span></button>
+            <button class="btn btn-secondary" id="secondaryHeroAction" data-demo="audit">Пройти аудит профиля</button>
+          </div>
+        </div>
+        <div class="hero-orbit" aria-hidden="true">
+          <div class="lift-visual">
+            <div class="lift-shaft"></div>
+            <div class="lift-car">↑</div>
+            <div class="orbit-chip c1">Задача</div>
+            <div class="orbit-chip c2">Команда</div>
+            <div class="orbit-chip c3">Результат</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid" id="dashboardStats" aria-label="Показатели для выбранной роли">
+        <article class="stat-card" style="--accent:var(--sky)"><span class="stat-label">Задач в банке</span><strong class="stat-value">286</strong><span class="stat-delta">+18 за месяц</span></article>
+        <article class="stat-card" style="--accent:var(--blue)"><span class="stat-label">Сейчас в работе</span><strong class="stat-value">74</strong><span class="stat-delta">82% без просрочек</span></article>
+        <article class="stat-card" style="--accent:var(--violet)"><span class="stat-label">Задач решено</span><strong class="stat-value">419</strong><span class="stat-delta">127 подтверждено эффектом</span></article>
+        <article class="stat-card" style="--accent:var(--coral)"><span class="stat-label">Экспертов</span><strong class="stat-value">3 842</strong><span class="stat-delta">636 готовы к проекту</span></article>
+      </div>
+
+      <div class="section-head" id="dashboardPrimaryHead">
+        <div><h2 id="dashboardPrimaryTitle">Рекомендовано вам</h2><p id="dashboardPrimaryText">Подбор объясним: опыт, компетенции, доступность и интересы.</p></div>
+        <button class="link-btn" id="dashboardPrimaryLink" data-go="tasks">Все задачи →</button>
+      </div>
+
+      <div class="content-grid" id="dashboardPrimaryGrid">
+        <div class="task-list" id="recommendedTasks"></div>
+        <aside class="card progress-card" id="dashboardSidebar">
+          <div class="progress-head">
+            <div><span class="tag green">В работе</span><h3>Цифровой маршрут промышленной кооперации</h3><p>Проект №PL-0241 · дедлайн 28 ноября</p></div>
+            <div class="progress-ring" style="--p:64"><span>64%</span></div>
+          </div>
+          <div class="mini-timeline">
+            <div class="mini-row"><span>Диагностика</span><div class="mini-bar"><span style="width:100%"></span></div><b>100</b></div>
+            <div class="mini-row"><span>Проектирование</span><div class="mini-bar"><span style="width:80%"></span></div><b>80</b></div>
+            <div class="mini-row"><span>Пилот</span><div class="mini-bar"><span style="width:42%"></span></div><b>42</b></div>
+            <div class="mini-row"><span>Оценка эффекта</span><div class="mini-bar"><span style="width:8%"></span></div><b>8</b></div>
+          </div>
+          <div class="next-step"><small>Ближайшая контрольная точка · 18 октября</small><strong>Согласовать состав предприятий пилота</strong></div>
+          <button class="btn btn-soft" style="width:100%;margin-top:14px" data-go="projects">Открыть проект</button>
+        </aside>
+      </div>
+
+      <div class="section-head" id="dashboardSecondaryHead">
+        <div><h2 id="dashboardSecondaryTitle">Лидеры сообщества</h2><p id="dashboardSecondaryText">Рейтинг основан только на завершённых и подтверждённых проектах.</p></div>
+        <button class="link-btn" id="dashboardSecondaryLink" data-go="experts">Каталог экспертов →</button>
+      </div>
+      <div class="leader-grid" id="leaderGrid"></div>
+    </section>
+
+    <section class="view" id="view-tasks" hidden>
+      <div class="page-title"><div><span class="eyebrow" id="tasksEyebrow" style="color:var(--blue)">банк задач</span><h1 id="tasksTitle">Задачи, готовые к работе</h1><p id="tasksSubtitle">Каждая карточка содержит источник, ожидаемый результат, ресурсы, KPI и четыре проверки зрелости.</p></div></div>
+      <div class="card filters" aria-label="Фильтры банка задач">
+        <div class="search-wrap"><label class="sr-only" for="taskSearch">Поиск</label><input class="field" id="taskSearch" type="search" placeholder="Поиск по задаче, компетенции или документу"></div>
+        <select class="field" id="sectorFilter" aria-label="Отрасль"><option value="all">Все отрасли</option><option value="industry">Промышленность</option><option value="city">Городская среда</option><option value="health">Здравоохранение</option><option value="education">Образование</option><option value="ecology">Экология</option></select>
+        <select class="field" id="regionFilter" aria-label="Регион"><option value="all">Все регионы</option><option value="federal">Федеральный уровень</option><option value="northwest">Северо-Запад</option><option value="volga">Поволжье</option><option value="siberia">Сибирь</option><option value="south">Юг</option></select>
+        <select class="field" id="statusFilter" aria-label="Статус"><option value="all">Все статусы</option><option value="planned">Открыта</option><option value="urgent">Срочная</option><option value="team">Нужна команда</option></select>
+        <button class="btn btn-soft btn-small" id="resetFilters">Сбросить</button>
+      </div>
+      <div class="result-count" id="taskResultCount" aria-live="polite"></div>
+      <div class="task-grid" id="taskGrid"></div>
+      <div class="card empty-state" id="taskEmpty" hidden><strong>Ничего не найдено</strong><p>Измените запрос или сбросьте фильтры.</p></div>
+    </section>
+
+    <section class="view" id="view-projects" hidden>
+      <div class="page-title"><div><span class="eyebrow" id="projectsEyebrow" style="color:var(--blue)">рабочее пространство</span><h1 id="projectsTitle">Ход проекта</h1><p id="projectsSubtitle">Канбан — для ежедневной работы, диаграмма Ганта — для сроков, зависимостей и контрольных точек.</p></div></div>
+      <div class="card project-header">
+        <div class="project-title-row">
+          <div class="project-icon">↗</div>
+          <div><div class="tag-row"><span class="tag green">В работе</span><span class="tag gray">PL-0241</span><span class="tag amber">Риск: средний</span></div><h2>Цифровой маршрут промышленной кооперации</h2><p>Заказчик: Министерство промышленности региона · Куратор: Мария Соколова</p></div>
+        </div>
+        <div class="project-rating-grid">
+          <div class="rating-box"><small>Проект</small><strong>★ 4,7</strong></div>
+          <div class="rating-box"><small>Заказчик</small><strong>★ 4,8</strong></div>
+          <div class="rating-box"><small>Команда</small><strong>★ 4,9</strong></div>
+        </div>
+      </div>
+
+      <div class="project-layout">
+        <div class="card workspace">
+          <div class="workspace-toolbar">
+            <div class="segmented" role="tablist" aria-label="Представление проекта">
+              <button class="active" role="tab" aria-selected="true" data-workspace="kanban">Канбан</button>
+              <button role="tab" aria-selected="false" data-workspace="gantt">Гант</button>
+            </div>
+            <button class="btn btn-blue btn-small" data-demo="newTask">+ Добавить работу</button>
+          </div>
+
+          <div id="workspace-kanban">
+            <p class="sr-only">Карточки можно перетаскивать между колонками.</p>
+            <div class="kanban" id="kanbanBoard">
+              <section class="kanban-column" data-column="plan"><header class="kanban-head"><span>Запланировано</span><span class="kanban-count">3</span></header><div class="kanban-cards">
+                <article class="kanban-card" draggable="true"><span class="tag gray">Аналитика</span><h4>Согласовать методику отбора предприятий</h4><footer><span>до 20 окт.</span><span class="tiny-avatar">ЕК</span></footer></article>
+                <article class="kanban-card" draggable="true"><span class="tag gray">Данные</span><h4>Подготовить перечень доступных реестров</h4><footer><span>до 22 окт.</span><span class="tiny-avatar">АИ</span></footer></article>
+                <article class="kanban-card" draggable="true"><span class="tag gray">Право</span><h4>Проверить условия обмена сведениями</h4><footer><span>до 24 окт.</span><span class="tiny-avatar">ОС</span></footer></article>
+              </div></section>
+              <section class="kanban-column" data-column="doing"><header class="kanban-head"><span>В работе</span><span class="kanban-count">3</span></header><div class="kanban-cards">
+                <article class="kanban-card" draggable="true"><span class="tag amber">Приоритет</span><h4>Интервью с пятью промышленными предприятиями</h4><footer><span>4/5 готово</span><span class="tiny-avatar">АП</span></footer></article>
+                <article class="kanban-card" draggable="true"><span class="tag gray">UX</span><h4>Прототип маршрута кооперации</h4><footer><span>до 18 окт.</span><span class="tiny-avatar">НК</span></footer></article>
+                <article class="kanban-card" draggable="true"><span class="tag gray">KPI</span><h4>Расчёт базовых значений показателей</h4><footer><span>до 19 окт.</span><span class="tiny-avatar">МЛ</span></footer></article>
+              </div></section>
+              <section class="kanban-column" data-column="review"><header class="kanban-head"><span>На проверке</span><span class="kanban-count">2</span></header><div class="kanban-cards">
+                <article class="kanban-card" draggable="true"><span class="tag green">Результат</span><h4>Карта заинтересованных сторон</h4><footer><span>заказчик</span><span class="tiny-avatar">АП</span></footer></article>
+                <article class="kanban-card" draggable="true"><span class="tag green">Результат</span><h4>Отчёт по барьерам кооперации</h4><footer><span>куратор</span><span class="tiny-avatar">ЕК</span></footer></article>
+              </div></section>
+              <section class="kanban-column" data-column="done"><header class="kanban-head"><span>Готово</span><span class="kanban-count">3</span></header><div class="kanban-cards">
+                <article class="kanban-card" draggable="true"><span class="tag green">Принято</span><h4>Паспорт проекта и критерии успеха</h4><footer><span>8 окт.</span><span class="tiny-avatar">МС</span></footer></article>
+                <article class="kanban-card" draggable="true"><span class="tag green">Принято</span><h4>План коммуникаций</h4><footer><span>9 окт.</span><span class="tiny-avatar">НК</span></footer></article>
+                <article class="kanban-card" draggable="true"><span class="tag green">Принято</span><h4>Реестр рисков v1</h4><footer><span>10 окт.</span><span class="tiny-avatar">АП</span></footer></article>
+              </div></section>
+            </div>
+          </div>
+
+          <div id="workspace-gantt" hidden>
+            <div class="gantt-wrap">
+              <div class="gantt" aria-label="Диаграмма Ганта по неделям">
+                <div class="g-head">Работа / неделя</div><div class="g-head">1</div><div class="g-head">2</div><div class="g-head">3</div><div class="g-head">4</div><div class="g-head">5</div><div class="g-head">6</div><div class="g-head">7</div><div class="g-head">8</div><div class="g-head">9</div><div class="g-head">10</div><div class="g-head">11</div><div class="g-head">12</div>
+                <div class="g-name">Диагностика</div><div class="g-cell" style="grid-column:2 / 14"><span class="g-bar blue" style="left:0;width:25%">Диагностика · 100%</span></div>
+                <div class="g-name">Проектирование</div><div class="g-cell" style="grid-column:2 / 14"><span class="g-bar violet" style="left:16.67%;width:33.33%">Проектирование · 80%</span></div>
+                <div class="g-name">Пилот</div><div class="g-cell" style="grid-column:2 / 14"><span class="g-bar coral" style="left:41.67%;width:41.66%">Пилот · 42%</span></div>
+                <div class="g-name">Оценка эффекта</div><div class="g-cell" style="grid-column:2 / 14"><span class="g-bar green" style="left:75%;width:25%">Оценка эффекта</span></div>
+                <div class="g-name">Публичный кейс</div><div class="g-cell" style="grid-column:2 / 14"><span class="g-bar blue" style="left:91.67%;width:8.33%">Кейс</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="side-panel">
+          <section class="card side-card"><h3>Контрольные точки</h3>
+            <div class="milestone"><span class="milestone-dot">✓</span><div><strong>Паспорт проекта утверждён</strong><small>8 октября</small></div></div>
+            <div class="milestone"><span class="milestone-dot">✓</span><div><strong>Диагностика завершена</strong><small>14 октября</small></div></div>
+            <div class="milestone pending"><span class="milestone-dot">3</span><div><strong>Состав пилота согласован</strong><small>18 октября</small></div></div>
+            <div class="milestone pending"><span class="milestone-dot">4</span><div><strong>Запуск пилота</strong><small>1 ноября</small></div></div>
+          </section>
+          <section class="card side-card"><h3>Риски и решения</h3><div class="risk"><strong>Доступ к отраслевым данным</strong>Решение: обезличенная выгрузка и отдельное соглашение о доступе. Владелец: заказчик.</div><button class="link-btn" style="margin-top:9px" data-demo="risk">Открыть реестр рисков →</button></section>
+          <section class="card side-card"><h3>Обратная связь</h3><p style="color:var(--muted);font-size:12px">После каждой контрольной точки стороны фиксируют качество результата, взаимодействия и прозрачность.</p><button class="btn btn-soft" style="width:100%" id="openRating">Оценить этап</button></section>
+        </aside>
+      </div>
+    </section>
+
+    <section class="view" id="view-experts" hidden>
+      <div class="page-title"><div><span class="eyebrow" id="expertsEyebrow" style="color:var(--blue)">профиль эксперта</span><h1 id="expertsTitle">Результаты важнее должностей</h1><p id="expertsSubtitle">Профиль объединяет проверенные проекты, вклад в сообщество, компетенции и доступность.</p></div></div>
+      <div class="card profile-hero">
+        <div class="profile-avatar">АП</div>
+        <div class="profile-copy"><div class="tag-row"><span class="tag green">Профиль подтверждён</span><span class="tag gray">Санкт-Петербург</span></div><h2>Алексей Петров</h2><p>Стратегические проекты · промышленная политика · цифровая трансформация</p><div class="skill-row"><span class="tag">Управление проектами</span><span class="tag">Аналитика</span><span class="tag">Публичный сектор</span><span class="tag">Фасилитация</span></div></div>
+        <div class="profile-score"><small>Рейтинг эксперта</small><strong>★ 4,91</strong><span>37 проверенных отзывов · 12 проектов</span></div>
+      </div>
+
+      <div class="profile-layout">
+        <section class="card activity-card">
+          <div class="activity-head"><div><h3>Вклад за последние 12 месяцев</h3><p>Результаты, экспертные проверки, наставничество и помощь другим командам.</p></div><span class="tag green">286 вкладов</span></div>
+          <div class="heat-scroll"><div class="heatmap" id="heatmap" aria-label="Календарь активности эксперта"></div></div>
+          <div class="heat-legend"><span>меньше</span><span class="legend-cell" style="background:#EDF1F5"></span><span class="legend-cell" style="background:rgba(153,197,233,.72)"></span><span class="legend-cell" style="background:rgba(71,98,182,.58)"></span><span class="legend-cell" style="background:rgba(71,98,182,.88)"></span><span class="legend-cell" style="background:var(--deep)"></span><span>больше</span></div>
+          <div class="activity-stats"><div class="activity-stat"><strong>12</strong><span>проектов</span></div><div class="activity-stat"><strong>31</strong><span>результат</span></div><div class="activity-stat"><strong>18</strong><span>экспертиз</span></div><div class="activity-stat"><strong>7</strong><span>наставничеств</span></div></div>
+        </section>
+        <aside class="card audit-card"><div class="tag green">Аудит обновлён 5 дней назад</div><h3 style="margin-top:14px">Профиль потенциала</h3><p>Самооценка сопоставлена с проверенными результатами и отзывами.</p>
+          <div class="audit-row"><div class="audit-line"><span>Стратегическое мышление</span><b>92%</b></div><div class="audit-track"><span style="width:92%"></span></div></div>
+          <div class="audit-row"><div class="audit-line"><span>Управление исполнением</span><b>86%</b></div><div class="audit-track"><span style="width:86%"></span></div></div>
+          <div class="audit-row"><div class="audit-line"><span>Работа со стейкхолдерами</span><b>89%</b></div><div class="audit-track"><span style="width:89%"></span></div></div>
+          <div class="audit-row"><div class="audit-line"><span>Правовые рамки</span><b>61%</b></div><div class="audit-track"><span style="width:61%"></span></div></div>
+          <div class="development-note"><strong>Зона развития:</strong> нормативное проектирование. Рекомендованы наставник и две задачи с юридическим куратором.</div>
+        </aside>
+      </div>
+
+      <div class="section-head"><div><h2>Эксперты, готовые к проекту</h2><p>Фильтрация по компетенциям, подтверждённым результатам и доступности.</p></div><button class="btn btn-soft btn-small" data-demo="expertFilter">Настроить подбор</button></div>
+      <div class="directory-grid" id="expertDirectory"></div>
+    </section>
+
+    <section class="view" id="view-customers" hidden>
+      <div class="page-title"><div><span class="eyebrow" style="color:var(--blue)">заказчики</span><h1>Ведомства, компании и лидеры, разместившие задачи</h1><p>Каждая задача трассируется к официальному источнику и имеет понятного заказчика — у него есть публичная страница со статистикой и списком задач.</p></div></div>
+      <div class="section-head"><div><h2>Каталог заказчиков</h2><p>Откройте страницу заказчика, чтобы увидеть все его задачи и подтверждённый эффект.</p></div></div>
+      <div class="directory-grid" id="customerDirectory"></div>
+    </section>
+
+    <div class="prototype-note">Учебный интерактивный прототип для магистерского диплома. Данные, организации, рейтинги и проекты вымышлены; интерфейс не является официальным ресурсом АНО «Россия — страна возможностей».</div>
+  </main>
+
+  <div class="drawer-backdrop" id="taskDrawer" aria-hidden="true">
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <div class="drawer-head"><div><span class="tag green" id="drawerStatus">Открыта</span><h2 id="drawerTitle"></h2></div><button class="close-btn" id="closeDrawer" aria-label="Закрыть">×</button></div>
+      <div class="drawer-body">
+        <p class="detail-summary" id="drawerSummary"></p>
+        <div class="detail-grid" id="drawerMeta"></div>
+        <h3>Карточка задачи</h3>
+        <div class="question-list" id="drawerQuestions"></div>
+        <h3 style="margin-top:24px">Проверки зрелости</h3>
+        <div class="maturity"><div class="check">Законность</div><div class="check">Согласованность</div><div class="check">Трассируемость</div><div class="check">Ресурсность</div></div>
+        <h3 style="margin-top:24px">Заказчик</h3>
+        <div class="customer-box"><div><a id="drawerCustomer" href="zakazchik.html" style="color:var(--deep);font-weight:800;text-decoration:none"></a><div class="rating"><span class="stars">★★★★★</span><span id="drawerCustomerRating"></span><span class="count">проверено</span></div></div><span class="tag green">Личность подтверждена</span></div>
+      </div>
+      <div class="drawer-footer"><div class="rating"><span class="stars">★★★★★</span><span id="drawerProjectRating"></span><span class="count">рейтинг задачи</span></div><button class="btn btn-blue" id="applyTask">Хочу взять задачу</button></div>
+    </aside>
+  </div>
+
+  <div class="rating-modal" id="ratingModal" aria-hidden="true">
+    <div class="rating-sheet" role="dialog" aria-modal="true" aria-labelledby="ratingTitle">
+      <h2 id="ratingTitle">Оценка этапа</h2><p>Оценки видны после взаимного отзыва и привязаны к подтверждённой контрольной точке.</p>
+      <div class="rating-line"><span>Качество результата</span><div class="star-picker" data-rating="quality" aria-label="Качество результата"></div></div>
+      <div class="rating-line"><span>Взаимодействие</span><div class="star-picker" data-rating="communication" aria-label="Взаимодействие"></div></div>
+      <div class="rating-line"><span>Прозрачность хода работ</span><div class="star-picker" data-rating="transparency" aria-label="Прозрачность"></div></div>
+      <div class="rating-actions"><button class="btn btn-soft" id="cancelRating">Отмена</button><button class="btn btn-blue" id="submitRating">Отправить отзыв</button></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="assets/site-nav.js"></script>
+  <script>
+    const tasks = [
+      {
+        id: 'PL-0318', sector: 'industry', region: 'northwest', status: ['planned','team'], accent: 'var(--blue)', match: 94,
+        tags: ['Промышленность','Северо-Запад','Команда 4–6 чел.'],
+        title: 'Локализация судоремонта и запуск пилота с предприятием',
+        summary: 'Подготовить программу локализации судоремонта в регионе и довести её до пилотного запуска на одном предприятии.',
+        source: 'Региональная промышленная стратегия', term: '6 месяцев', level: 'Региональная', rating: '4,8', customerRating: '4,9', reviews: 14,
+        customerId: 'komitet-promyshlennosti',
+        customer: 'Комитет промышленной политики региона', resource: 'Данные предприятий, экспертиза, связь с отраслью',
+        reason: 'Опыт в промышленной политике и запуске межведомственных проектов',
+        questions: [
+          ['Что нужно сделать?', 'Разработать программу локализации судоремонта и запустить пилот с одним предприятием.'],
+          ['Зачем это нужно?', 'Большая часть судов ремонтируется за пределами региона; теряются заказы, компетенции и рабочие места.'],
+          ['Какой результат ждёте?', 'Программа, запущенный пилот и обоснование для регионального бюджета.'],
+          ['Какие ресурсы готовы дать?', 'Данные предприятий, связь с профильным департаментом и отраслевую экспертизу.'],
+          ['К какому сроку?', 'Шесть месяцев с даты утверждения паспорта проекта.'],
+          ['Правовые рамки', 'Региональная стратегия промышленного развития и применимые нормы закупок и господдержки.'],
+          ['Как поймёте, что получилось?', 'Пилот запущен, программа принята, бюджетное обоснование подготовлено.']
+        ]
+      },
+      {
+        id: 'PL-0342', sector: 'city', region: 'volga', status: ['planned','urgent'], accent: 'var(--coral)', match: 89,
+        tags: ['Городская среда','Поволжье','Срочно'],
+        title: 'Сократить срок согласования сезонных городских маршрутов',
+        summary: 'Пересобрать процесс согласования маршрутов так, чтобы сократить цикл с 45 до 20 рабочих дней.',
+        source: 'Наказ жителей №1472', term: '12 недель', level: 'Муниципальная', rating: '4,6', customerRating: '4,7', reviews: 9,
+        customerId: 'administraciya-gorokruga',
+        customer: 'Администрация городского округа', resource: 'Доступ к процессам, рабочая группа, данные обращений',
+        reason: 'Подходит опыт процессного анализа и фасилитации',
+        questions: [
+          ['Что нужно сделать?', 'Описать текущий процесс, устранить дублирование и внедрить цифровой маршрут согласования.'],
+          ['Зачем это нужно?', 'Долгие согласования снижают доступность транспорта в сезон и вызывают повторные обращения жителей.'],
+          ['Какой результат ждёте?', 'Новый регламент, прототип цифрового маршрута и измеренный пилот.'],
+          ['Какие ресурсы готовы дать?', 'Рабочую группу, данные обращений, доступ к исполнителям процесса.'],
+          ['К какому сроку?', 'Двенадцать недель.'],
+          ['Правовые рамки', 'Муниципальные регламенты и требования к организации перевозок.'],
+          ['Как поймёте, что получилось?', 'Медианный срок согласования не более 20 рабочих дней.']
+        ]
+      },
+      {
+        id: 'PL-0291', sector: 'health', region: 'siberia', status: ['planned','team'], accent: 'var(--violet)', match: 86,
+        tags: ['Здравоохранение','Сибирь','Нужна команда'],
+        title: 'Маршрут сопровождения пациентов после сложных операций',
+        summary: 'Создать единый маршрут взаимодействия пациента, поликлиники, стационара и социальной службы.',
+        source: 'Региональная программа здравоохранения', term: '5 месяцев', level: 'Региональная', rating: '4,9', customerRating: '4,8', reviews: 21,
+        customerId: 'minzdrav-regiona',
+        customer: 'Министерство здравоохранения региона', resource: 'Экспертная группа, данные обезличенной аналитики, площадка пилота',
+        reason: 'Совпадение по компетенции «межведомственное проектирование»',
+        questions: [
+          ['Что нужно сделать?', 'Спроектировать и испытать маршрут сопровождения пациента после выписки.'],
+          ['Зачем это нужно?', 'Часть пациентов теряет связь с системой и поздно получает реабилитацию.'],
+          ['Какой результат ждёте?', 'Регламент, цифровая карта маршрута, пилот в двух учреждениях.'],
+          ['Какие ресурсы готовы дать?', 'Экспертов, обезличенную аналитику, пилотные площадки.'],
+          ['К какому сроку?', 'Пять месяцев.'],
+          ['Правовые рамки', 'Медицинская тайна, персональные данные, региональные порядки оказания помощи.'],
+          ['Как поймёте, что получилось?', 'Не менее 80% пациентов проходят первый этап сопровождения в срок.']
+        ]
+      },
+      {
+        id: 'PL-0377', sector: 'education', region: 'federal', status: ['planned'], accent: 'var(--sky)', match: 78,
+        tags: ['Образование','Федеральный уровень','Исследование'],
+        title: 'Модель оценки эффекта проектного обучения в колледжах',
+        summary: 'Разработать измеримую модель оценки и проверить её на выборке образовательных организаций.',
+        source: 'Федеральный проект «Профессионалитет»', term: '4 месяца', level: 'Федеральная', rating: '4,5', customerRating: '4,6', reviews: 7,
+        customerId: 'federalny-proektny-ofis',
+        customer: 'Федеральный проектный офис', resource: 'Данные мониторинга, эксперты, доступ к пилотной выборке',
+        reason: 'Высокое совпадение по аналитике, требуется усиление методологом',
+        questions: [
+          ['Что нужно сделать?', 'Определить показатели, методику измерения и формат регулярного мониторинга.'],
+          ['Зачем это нужно?', 'Текущие показатели описывают активность, но недостаточно отражают образовательный и карьерный эффект.'],
+          ['Какой результат ждёте?', 'Методика, инструмент сбора данных и результаты пилотирования.'],
+          ['Какие ресурсы готовы дать?', 'Мониторинговые данные, экспертов и выборку колледжей.'],
+          ['К какому сроку?', 'Четыре месяца.'],
+          ['Правовые рамки', 'Требования к образовательной статистике и персональным данным.'],
+          ['Как поймёте, что получилось?', 'Методика воспроизводима и принята проектным офисом для следующего цикла.']
+        ]
+      },
+      {
+        id: 'PL-0360', sector: 'ecology', region: 'south', status: ['planned','urgent'], accent: 'var(--green)', match: 82,
+        tags: ['Экология','Юг','Пилот'],
+        title: 'Система раннего выявления несанкционированных свалок',
+        summary: 'Объединить спутниковые снимки, обращения жителей и выездные проверки в единый цикл реагирования.',
+        source: 'Региональный план экологических мероприятий', term: '16 недель', level: 'Региональная', rating: '4,7', customerRating: '4,5', reviews: 11,
+        customerId: 'minprirody-regiona',
+        customer: 'Министерство природных ресурсов региона', resource: 'Геоданные, инспекторы, доступ к пилотной территории',
+        reason: 'Совпадение по управлению данными и межведомственному взаимодействию',
+        questions: [
+          ['Что нужно сделать?', 'Создать процесс выявления, подтверждения и контроля устранения свалок.'],
+          ['Зачем это нужно?', 'Реагирование фрагментировано, а повторные нарушения не отслеживаются системно.'],
+          ['Какой результат ждёте?', 'Рабочий прототип и регламент реагирования на пилотной территории.'],
+          ['Какие ресурсы готовы дать?', 'Геоданные, инспекторов и доступ к пилотной территории.'],
+          ['К какому сроку?', 'Шестнадцать недель.'],
+          ['Правовые рамки', 'Природоохранное законодательство, требования к геоданным и доказательствам нарушения.'],
+          ['Как поймёте, что получилось?', 'Срок от обнаружения до подтверждения сокращён минимум на 40%.']
+        ]
+      },
+      {
+        id: 'PL-0388', sector: 'industry', region: 'federal', status: ['planned','team'], accent: 'var(--deep)', match: 73,
+        tags: ['Технологии','Федеральный уровень','Экспертиза'],
+        title: 'Библиотека типовых сценариев внедрения отечественного ПО',
+        summary: 'Собрать проверенные сценарии миграции и сделать инструмент подбора по отрасли и масштабу организации.',
+        source: 'Национальная цель цифровой трансформации', term: '7 месяцев', level: 'Федеральная', rating: '4,8', customerRating: '4,9', reviews: 18,
+        customerId: 'otraslevoy-centr',
+        customer: 'Отраслевой центр компетенций', resource: 'Доступ к кейсам, экспертный совет, методическая поддержка',
+        reason: 'Подходит инфраструктурный опыт; потребуется архитектор корпоративных систем',
+        questions: [
+          ['Что нужно сделать?', 'Сформировать библиотеку сценариев миграции и интерактивный подборщик.'],
+          ['Зачем это нужно?', 'Организации повторяют одни и те же ошибки и слабо переиспользуют успешные практики.'],
+          ['Какой результат ждёте?', 'Не менее 30 проверенных сценариев и работающий прототип подбора.'],
+          ['Какие ресурсы готовы дать?', 'Кейсы организаций, экспертный совет и методическую поддержку.'],
+          ['К какому сроку?', 'Семь месяцев.'],
+          ['Правовые рамки', 'Требования информационной безопасности и лицензирования ПО.'],
+          ['Как поймёте, что получилось?', 'Не менее пяти организаций используют сценарии в реальных проектах миграции.']
+        ]
+      }
+    ];
+
+    const experts = [
+      {initials:'ЕС',name:'Елена Смирнова',role:'Городские проекты',rating:'4,95',projects:16,helped:24,skills:['Фасилитация','Сервисы'],available:'12 ч/нед'},
+      {initials:'МК',name:'Михаил Котов',role:'Промышленная политика',rating:'4,92',projects:14,helped:19,skills:['Стратегия','Инвестиции'],available:'8 ч/нед'},
+      {initials:'АВ',name:'Анна Власова',role:'Социальные проекты',rating:'4,89',projects:11,helped:31,skills:['Impact','Исследования'],available:'10 ч/нед'},
+      {initials:'РН',name:'Роман Нестеров',role:'Цифровая трансформация',rating:'4,86',projects:9,helped:14,skills:['Архитектура','Данные'],available:'6 ч/нед'},
+      {initials:'ОЛ',name:'Ольга Лебедева',role:'Здравоохранение',rating:'4,84',projects:13,helped:22,skills:['Маршруты','KPI'],available:'10 ч/нед'},
+      {initials:'ИД',name:'Илья Данилов',role:'Экология и территории',rating:'4,81',projects:8,helped:17,skills:['Геоданные','Пилоты'],available:'14 ч/нед'}
+    ];
+
+    const customers = [
+      {id:'komitet-promyshlennosti', name:'Комитет промышленной политики региона', type:'РОИВ', sector:'Промышленность', bio:'Отвечает за реализацию региональной промышленной стратегии и запуск пилотов локализации производства совместно с предприятиями.', rating:'4,8', stats:{tasks:9,lifted:11,lifts:4}, taskIds:['PL-0318']},
+      {id:'administraciya-gorokruga', name:'Администрация городского округа', type:'Муниципалитет', sector:'Городская среда', bio:'Отвечает за городские сервисы и исполнение наказов жителей; публикует задачи по сокращению сроков и цифровизации процессов.', rating:'4,6', stats:{tasks:5,lifted:6,lifts:2}, taskIds:['PL-0342']},
+      {id:'minzdrav-regiona', name:'Министерство здравоохранения региона', type:'РОИВ', sector:'Здравоохранение', bio:'Формирует региональную программу здравоохранения и ищет управленцев для меж­ведомственных маршрутов пациентов.', rating:'4,9', stats:{tasks:7,lifted:9,lifts:3}, taskIds:['PL-0291']},
+      {id:'federalny-proektny-ofis', name:'Федеральный проектный офис', type:'ФОИВ', sector:'Образование', bio:'Координирует федеральный проект «Профессионалитет» и подбирает экспертов для оценки эффекта проектного обучения.', rating:'4,5', stats:{tasks:12,lifted:15,lifts:5}, taskIds:['PL-0377']},
+      {id:'minprirody-regiona', name:'Министерство природных ресурсов региона', type:'РОИВ', sector:'Экология', bio:'Отвечает за региональный план экологических мероприятий и контроль за несанкционированными свалками.', rating:'4,7', stats:{tasks:6,lifted:8,lifts:2}, taskIds:['PL-0360']},
+      {id:'otraslevoy-centr', name:'Отраслевой центр компетенций', type:'Корпорация', sector:'Технологии', bio:'Собирает и тиражирует проверенные сценарии цифровой трансформации для организаций реального сектора.', rating:'4,8', stats:{tasks:8,lifted:10,lifts:4}, taskIds:['PL-0388']}
+    ];
+
+    const views = ['dashboard','tasks','projects','experts','customers'];
+    let currentRole = 'expert';
+    let currentTask = null;
+    let toastTimer;
+
+    const esc = value => String(value).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+
+    function ratingHTML(value, reviews) {
+      return `<span class="rating"><span class="stars" aria-hidden="true">★★★★★</span><span>${esc(value)}</span>${reviews !== undefined ? `<span class="count">(${reviews})</span>` : ''}</span>`;
+    }
+
+    function taskCardHTML(task, compact=false, role=currentRole) {
+      const tagHTML = task.tags.map((t,i) => `<span class="tag ${i===2 && task.status.includes('urgent') ? 'red' : ''}">${esc(t)}</span>`).join('');
+      const score = role === 'customer'
+        ? `${task.reviews}<small>откликов</small>`
+        : role === 'curator'
+          ? `${task.status.includes('urgent') ? '3/4' : '4/4'}<small>проверки</small>`
+          : `${task.match}%<small>совпадение</small>`;
+      const thirdLabel = role === 'customer' ? 'Рейтинг задачи' : role === 'curator' ? 'Рейтинг заказчика' : 'Рейтинг проекта';
+      const thirdValue = role === 'curator' ? ratingHTML(task.customerRating) : ratingHTML(task.rating, task.reviews);
+      const reason = compact && role === 'expert'
+        ? `<strong>Почему подходит:</strong> ${esc(task.reason)}`
+        : role === 'customer'
+          ? `<strong>Статус:</strong> опубликована · ${task.reviews} подтверждённых откликов`
+          : role === 'curator'
+            ? `<strong>Проверка:</strong> ${task.status.includes('urgent') ? 'нужно уточнить ресурсность и срок' : 'четыре фильтра пройдены'}`
+            : `<strong>Источник:</strong> ${esc(task.source)} · <strong>Заказчик:</strong> ${esc(task.customer)}`;
+      return `<article class="card task-card" style="--task-accent:${task.accent}" data-task-id="${task.id}" data-search="${esc((task.title+' '+task.summary+' '+task.tags.join(' ')+' '+task.source).toLowerCase())}" data-sector="${task.sector}" data-region="${task.region}" data-status="${task.status.join(' ')}">
+        <button class="task-open" aria-label="Открыть задачу: ${esc(task.title)}" data-open-task="${task.id}">Открыть</button>
+        <div class="task-top"><div><div class="tag-row">${tagHTML}</div><h3>${esc(task.title)}</h3><p>${esc(task.summary)}</p></div><div class="match-score">${score}</div></div>
+        <div class="task-meta"><div><span class="meta-label">Срок</span><span class="meta-value">${esc(task.term)}</span></div><div><span class="meta-label">Уровень</span><span class="meta-value">${esc(task.level)}</span></div><div><span class="meta-label">${thirdLabel}</span>${thirdValue}</div></div>
+        <div class="task-reason">${reason}</div>
+      </article>`;
+    }
+
+    function renderTaskGrid() {
+      const grid = document.getElementById('taskGrid');
+      grid.innerHTML = tasks.map(t => taskCardHTML(t,false)).join('');
+      applyTaskFilters();
+    }
+
+    function renderExperts() {
+      const leaderGrid = document.getElementById('leaderGrid');
+      leaderGrid.innerHTML = experts.slice(0,3).map(m => `<article class="card person-card"><div class="person-top"><div class="person-avatar">${m.initials}</div><div><h3>${m.name}</h3><p>${m.role}</p>${ratingHTML(m.rating)}</div></div><div class="person-stats"><div><strong>${m.projects}</strong>проектов</div><div><strong>${m.helped}</strong>людям помог</div></div></article>`).join('');
+
+      document.getElementById('expertDirectory').innerHTML = experts.map(m => `<article class="card directory-card"><div class="person-top"><div class="person-avatar">${m.initials}</div><div><h3>${m.name}</h3><p>${m.role}</p>${ratingHTML(m.rating)}</div></div><div class="skill-row" style="margin-top:13px">${m.skills.map(s=>`<span class="tag">${s}</span>`).join('')}</div><div class="availability">Доступен: ${m.available}</div><div class="person-stats"><div><strong>${m.projects}</strong>завершено</div><div><strong>${m.helped}</strong>вкладов в людей</div></div></article>`).join('');
+    }
+
+    function renderCustomers() {
+      const typeColor = {'ФОИВ':'var(--blue)','РОИВ':'var(--violet)','Муниципалитет':'var(--muted)','Корпорация':'var(--amber)'};
+      document.getElementById('customerDirectory').innerHTML = customers.map(c => `<article class="card directory-card"><div class="tag-row"><span class="tag" style="color:#fff;background:${typeColor[c.type] || 'var(--muted)'}">${c.type}</span><span class="tag gray">${c.sector}</span></div><h3 style="margin-top:9px"><a href="zakazchik.html#${c.id}" style="color:inherit;text-decoration:none">${c.name}</a></h3><p style="color:var(--muted);font-size:12px;margin-top:5px">${c.bio}</p><div class="person-stats" style="margin-top:13px"><div><strong>${c.stats.tasks}</strong>задач</div><div><strong>${c.stats.lifted}</strong>поднято экспертов</div><div><strong>${c.stats.lifts}</strong>лифтов</div></div><a class="link-btn" href="zakazchik.html#${c.id}" style="display:inline-block;margin-top:10px">Открыть страницу →</a></article>`).join('');
+    }
+
+
+    const roleViews = {
+      expert: {
+        label: 'Эксперт',
+        heroEyebrow: 'персональная траектория эксперта',
+        heroTitle: 'Поднимай проекты. Расти вместе с ними.',
+        heroText: 'Найдите задачу, которая соответствует вашему опыту, соберите команду и превратите идею в работающий публичный результат.',
+        primaryAction: {label:'Подобрать задачу →', go:'tasks'},
+        secondaryAction: {label:'Пройти аудит профиля', demo:'audit'},
+        nav: {tasks:'Банк задач', projects:'Мои проекты', experts:'Эксперты'},
+        stats: [
+          ['Подходящих задач','18','+4 за неделю','var(--sky)',''],
+          ['Мои заявки','3','1 ожидает решения','var(--blue)','neutral'],
+          ['Проектов в работе','1','контрольная точка 18 октября','var(--violet)','neutral'],
+          ['Рейтинг Эксперта','4,86','12 подтверждённых отзывов','var(--coral)','']
+        ],
+        primaryTitle: 'Рекомендовано вам',
+        primaryText: 'Подбор объясним: опыт, компетенции, доступность и интересы.',
+        primaryLink: {label:'Все задачи →', go:'tasks'},
+        secondaryTitle: 'Лидеры сообщества',
+        secondaryText: 'Рейтинг основан только на завершённых и подтверждённых проектах.',
+        secondaryLink: {label:'Каталог экспертов →', go:'experts'}
+      },
+      customer: {
+        label: 'Заказчик',
+        heroEyebrow: 'от задачи к сильной команде',
+        heroTitle: 'Сформулируйте задачу. Найдите тех, кто её решит.',
+        heroText: 'Упакуйте государственную или общественно значимую задачу, получите проверенные отклики и управляйте результатом в одном пространстве.',
+        primaryAction: {label:'Создать задачу →', demo:'createTask'},
+        secondaryAction: {label:'Проверить зрелость задачи', demo:'maturity'},
+        nav: {tasks:'Мои задачи', projects:'Мои проекты', experts:'Подбор экспертов'},
+        stats: [
+          ['Моих задач','7','2 готовятся к публикации','var(--sky)','neutral'],
+          ['Новых откликов','12','+5 за неделю','var(--blue)',''],
+          ['Проектов в работе','4','3 идут без отклонений','var(--violet)',''],
+          ['Рейтинг Заказчика','4,82','17 подтверждённых отзывов','var(--coral)','']
+        ],
+        primaryTitle: 'Подходящие эксперты',
+        primaryText: 'Кандидаты подобраны по компетенциям, результатам, доступности и опыту похожих проектов.',
+        primaryLink: {label:'Все эксперты →', go:'experts'},
+        secondaryTitle: 'Мои активные задачи',
+        secondaryText: 'Публикация, сбор откликов и выполнение — в одном контуре.',
+        secondaryLink: {label:'Перейти к задачам →', go:'tasks'}
+      },
+      curator: {
+        label: 'Куратор',
+        heroEyebrow: 'портфель задач и проектов',
+        heroTitle: 'Управляйте портфелем. Доводите проекты до эффекта.',
+        heroText: 'Проверяйте зрелость задач, собирайте команды, снимайте риски и следите, чтобы результат дошёл до реального внедрения.',
+        primaryAction: {label:'Открыть портфель →', go:'projects'},
+        secondaryAction: {label:'Очередь модерации', go:'tasks'},
+        nav: {tasks:'Очередь задач', projects:'Портфель', experts:'Эксперты'},
+        stats: [
+          ['На модерации','9','3 решения нужны сегодня','var(--sky)','warn'],
+          ['Активных проектов','24','19 идут по плану','var(--blue)',''],
+          ['Высоких рисков','3','−1 за неделю','var(--violet)',''],
+          ['Эффект подтверждён','68%','по 15 завершённым проектам','var(--coral)','neutral']
+        ],
+        primaryTitle: 'Требуют решения',
+        primaryText: 'Задачи и проекты, где срок, ресурсность или полномочия требуют вмешательства куратора.',
+        primaryLink: {label:'Вся очередь →', go:'tasks'},
+        secondaryTitle: 'Контрольные точки недели',
+        secondaryText: 'Ближайшие решения по портфелю и ответственные за них.',
+        secondaryLink: {label:'Открыть портфель →', go:'projects'}
+      }
+    };
+
+    function setAction(button, action) {
+      if (!button || !action) return;
+      button.textContent = action.label;
+      delete button.dataset.go;
+      delete button.dataset.demo;
+      if (action.go) button.dataset.go = action.go;
+      if (action.demo) button.dataset.demo = action.demo;
+    }
+
+    function renderDashboardStats(stats) {
+      const grid = document.getElementById('dashboardStats');
+      grid.innerHTML = stats.map(([label,value,delta,accent,tone]) => `<article class="stat-card" style="--accent:${accent}"><span class="stat-label">${esc(label)}</span><strong class="stat-value">${esc(value)}</strong><span class="stat-delta ${tone || ''}">${esc(delta)}</span></article>`).join('');
+    }
+
+    function candidateCardHTML(expert, index) {
+      const matches = [96,93,89];
+      const reasons = [
+        'Подтверждён опыт запуска отраслевых пилотов и работы с региональными органами власти.',
+        'Сильный профиль по стратегии, инвестиционным моделям и промышленной кооперации.',
+        'Опыт оценки общественного эффекта и организации межведомственных исследований.'
+      ];
+      return `<article class="card task-card candidate-card" style="--task-accent:${['var(--blue)','var(--violet)','var(--coral)'][index]}">
+        <div class="task-top"><div class="person-top"><div class="person-avatar">${esc(expert.initials)}</div><div class="candidate-copy"><div class="tag-row"><span class="tag green">Профиль подтверждён</span><span class="tag gray">${esc(expert.available)}</span></div><h3>${esc(expert.name)}</h3><p>${esc(expert.role)}</p></div></div><div class="match-score">${matches[index]}%<small>совпадение</small></div></div>
+        <div class="task-meta"><div><span class="meta-label">Рейтинг</span>${ratingHTML(expert.rating)}</div><div><span class="meta-label">Завершено</span><span class="meta-value">${expert.projects} проектов</span></div><div><span class="meta-label">Вклад</span><span class="meta-value">${expert.helped} людям</span></div></div>
+        <div class="task-reason"><strong>Почему подходит:</strong> ${esc(reasons[index])}</div>
+        <div class="dashboard-item-actions"><button class="btn btn-soft btn-small" data-go="experts">Открыть профиль</button><button class="btn btn-blue btn-small" data-demo="inviteExpert">Пригласить</button></div>
+      </article>`;
+    }
+
+    function curatorQueueCardHTML(task, index) {
+      const queue = [
+        {stage:'Юридическая проверка', deadline:'Сегодня, 16:00', issue:'Не указан владелец результата после завершения пилота.', tag:'Срок сегодня', cls:'red', checks:'3/4'},
+        {stage:'Проверка ресурсности', deadline:'Завтра, 12:00', issue:'Нужно подтвердить доступ к обезличенным данным двух учреждений.', tag:'Нужен ответ', cls:'amber', checks:'3/4'},
+        {stage:'Согласование команды', deadline:'18 октября', issue:'Два сильных кандидата; требуется решение по руководителю проекта.', tag:'Выбор команды', cls:'green', checks:'4/4'}
+      ][index];
+      return `<article class="card task-card queue-card" style="--task-accent:${task.accent}">
+        <div class="task-top"><div><div class="tag-row"><span class="tag ${queue.cls}">${queue.tag}</span><span class="tag gray">${esc(task.id)}</span></div><h3>${esc(task.title)}</h3><p>${esc(queue.issue)}</p></div><div class="match-score">${queue.checks}<small>проверки</small></div></div>
+        <div class="task-meta"><div><span class="meta-label">Этап</span><span class="meta-value">${queue.stage}</span></div><div><span class="meta-label">Срок решения</span><span class="meta-value">${queue.deadline}</span></div><div><span class="meta-label">Заказчик</span><span class="meta-value">${esc(task.customer)}</span></div></div>
+        <div class="dashboard-item-actions"><button class="btn btn-blue btn-small" data-open-task="${task.id}">Открыть карточку</button><button class="btn btn-soft btn-small" data-demo="assignCurator">Назначить ответственного</button></div>
+      </article>`;
+    }
+
+    function expertSidebarHTML() {
+      return `<div class="progress-head"><div><span class="tag green">В работе</span><h3>Цифровой маршрут промышленной кооперации</h3><p>Проект №PL-0241 · дедлайн 28 ноября</p></div><div class="progress-ring" style="--p:64"><span>64%</span></div></div>
+        <div class="mini-timeline"><div class="mini-row"><span>Диагностика</span><div class="mini-bar"><span style="width:100%"></span></div><b>100</b></div><div class="mini-row"><span>Проектирование</span><div class="mini-bar"><span style="width:80%"></span></div><b>80</b></div><div class="mini-row"><span>Пилот</span><div class="mini-bar"><span style="width:42%"></span></div><b>42</b></div><div class="mini-row"><span>Оценка эффекта</span><div class="mini-bar"><span style="width:8%"></span></div><b>8</b></div></div>
+        <div class="next-step"><small>Ближайшая контрольная точка · 18 октября</small><strong>Согласовать состав предприятий пилота</strong></div><button class="btn btn-soft" style="width:100%;margin-top:14px" data-go="projects">Открыть проект</button>`;
+    }
+
+    function customerSidebarHTML() {
+      return `<div class="progress-head"><div><span class="tag amber">Сбор откликов</span><h3>Локализация судоремонта</h3><p>Задача PL-0318 · опубликована 3 дня назад</p></div><div class="progress-ring" style="--p:75"><span>12</span></div></div>
+        <div class="portfolio-list"><div class="portfolio-row"><span>Новые отклики</span><strong>5</strong></div><div class="portfolio-row"><span>Опыт подтверждён</span><strong>8 из 12</strong></div><div class="portfolio-row"><span>Требуют ответа</span><strong>3</strong></div></div>
+        <div class="next-step"><small>Следующее действие · до 17 октября</small><strong>Сформировать короткий список и назначить интервью</strong></div><button class="btn btn-blue" style="width:100%;margin-top:14px" data-go="experts">Сравнить экспертов</button>`;
+    }
+
+    function curatorSidebarHTML() {
+      return `<div class="progress-head"><div><span class="tag green">Портфель</span><h3>Состояние активных проектов</h3><p>24 проекта · обновлено сегодня в 10:30</p></div><div class="progress-ring" style="--p:79"><span>79%</span></div></div>
+        <div class="portfolio-list"><div class="portfolio-row"><span>Идут по плану</span><strong>19</strong></div><div class="portfolio-row"><span>Требуют внимания</span><strong>2</strong></div><div class="portfolio-row"><span>Высокий риск</span><strong>3</strong></div></div>
+        <div class="next-step"><small>Совещание портфеля · сегодня, 15:00</small><strong>Решение по доступу к данным и переносу двух этапов</strong></div><button class="btn btn-soft" style="width:100%;margin-top:14px" data-go="projects">Открыть портфель</button>`;
+    }
+
+    function renderCustomerProjects() {
+      const projects = [
+        {title:'Локализация судоремонта', status:'Сбор откликов', cls:'amber', progress:28, date:'Выбор команды · 21 октября', metric:'12 откликов'},
+        {title:'Цифровой маршрут промышленной кооперации', status:'В работе', cls:'green', progress:64, date:'Контрольная точка · 18 октября', metric:'64% готово'},
+        {title:'Модель оценки проектного обучения', status:'На проверке', cls:'', progress:88, date:'Приёмка этапа · 19 октября', metric:'3 результата'}
+      ];
+      return projects.map((p,i)=>`<article class="card person-card project-summary-card"><div class="tag-row"><span class="tag ${p.cls}">${p.status}</span><span class="tag gray">PL-0${318+i*24}</span></div><h3>${p.title}</h3><p>${p.date}</p><div class="mini-bar"><span style="width:${p.progress}%"></span></div><div class="person-stats"><div><strong>${p.progress}%</strong>прогресс</div><div><strong>${p.metric}</strong>состояние</div></div></article>`).join('');
+    }
+
+    function renderCuratorMilestones() {
+      const items = [
+        {title:'Подтвердить ресурсность пилота', project:'Маршрут сопровождения пациентов', date:'Сегодня · 16:00', owner:'Мария Соколова', accent:'var(--coral)', tag:'Решение'},
+        {title:'Утвердить руководителя команды', project:'Локализация судоремонта', date:'18 октября · 12:00', owner:'Андрей Ким', accent:'var(--violet)', tag:'Команда'},
+        {title:'Принять методику оценки эффекта', project:'Проектное обучение в колледжах', date:'19 октября · 15:30', owner:'Елена Орлова', accent:'var(--blue)', tag:'Приёмка'}
+      ];
+      return items.map(item=>`<article class="card person-card milestone-card" style="--task-accent:${item.accent}"><div class="tag-row"><span class="tag">${item.tag}</span><span class="tag gray">${item.date}</span></div><h3>${item.title}</h3><p>${item.project}</p><div class="person-stats"><div><strong>${item.owner}</strong>ответственный</div><button class="link-btn" data-go="projects">Открыть →</button></div></article>`).join('');
+    }
+
+    function renderRolePrimary(role) {
+      const host = document.getElementById('recommendedTasks');
+      if (role === 'customer') {
+        host.innerHTML = experts.slice(0,3).map(candidateCardHTML).join('');
+      } else if (role === 'curator') {
+        host.innerHTML = tasks.slice(0,3).map(curatorQueueCardHTML).join('');
+      } else {
+        host.innerHTML = tasks.slice(0,3).map(t => taskCardHTML(t,true,'expert')).join('');
+      }
+    }
+
+    function renderRoleSecondary(role) {
+      const host = document.getElementById('leaderGrid');
+      if (role === 'customer') {
+        host.innerHTML = renderCustomerProjects();
+      } else if (role === 'curator') {
+        host.innerHTML = renderCuratorMilestones();
+      } else {
+        host.innerHTML = experts.slice(0,3).map(m => `<article class="card person-card"><div class="person-top"><div class="person-avatar">${m.initials}</div><div><h3>${m.name}</h3><p>${m.role}</p>${ratingHTML(m.rating)}</div></div><div class="person-stats"><div><strong>${m.projects}</strong>проектов</div><div><strong>${m.helped}</strong>людям помог</div></div></article>`).join('');
+      }
+    }
+
+    function updateRolePageCopy(role) {
+      const copy = {
+        expert: {
+          tasks:['банк задач','Задачи, готовые к работе','Каждая карточка содержит источник, ожидаемый результат, ресурсы, KPI и четыре проверки зрелости.'],
+          projects:['рабочее пространство эксперта','Ход моего проекта','Канбан — для ежедневной работы, диаграмма Ганта — для сроков, зависимостей и контрольных точек.'],
+          experts:['профиль эксперта','Результаты важнее должностей','Профиль объединяет проверенные проекты, вклад в сообщество, компетенции и доступность.']
+        },
+        customer: {
+          tasks:['задачи заказчика','Мои задачи и отклики','Следите за зрелостью постановки, качеством откликов и переходом задачи в проект.'],
+          projects:['контроль результата','Проекты заказчика','Контролируйте сроки, ресурсы, риски и приёмку результата без микроменеджмента команды.'],
+          experts:['подбор команды','Эксперты, готовые к проекту','Сравнивайте подтверждённый опыт, рейтинги, вклад и реальную доступность кандидатов.']
+        },
+        curator: {
+          tasks:['кураторская очередь','Проверка и сопровождение задач','Здесь собраны задачи на модерации, проверке зрелости и согласовании команды.'],
+          projects:['портфель проектов','Сопровождение портфеля','Контролируйте контрольные точки, зависимости, риски и подтверждение общественного эффекта.'],
+          experts:['сообщество экспертов','Эксперты и руководители проектов','Проверенные профили для комплектования команд, наставничества и экспертной оценки.']
+        }
+      }[role];
+      [['tasks','tasks'],['projects','projects'],['experts','experts']].forEach(([prefix,key])=>{
+        const values = copy[key];
+        document.getElementById(`${prefix}Eyebrow`).textContent = values[0];
+        document.getElementById(`${prefix}Title`).textContent = values[1];
+        document.getElementById(`${prefix}Subtitle`).textContent = values[2];
+      });
+    }
+
+    function configureTaskDrawerAction() {
+      const apply = document.getElementById('applyTask');
+      if (currentRole === 'customer') {
+        apply.textContent = 'Редактировать задачу';
+        apply.dataset.roleAction = 'edit';
+      } else if (currentRole === 'curator') {
+        apply.textContent = 'Начать проверку';
+        apply.dataset.roleAction = 'review';
+      } else {
+        apply.textContent = 'Хочу взять задачу';
+        apply.dataset.roleAction = 'apply';
+      }
+      apply.disabled = false;
+    }
+
+    function applyRole(role, announce=true) {
+      if (!roleViews[role]) role = 'expert';
+      currentRole = role;
+      const cfg = roleViews[role];
+      document.body.dataset.role = role;
+      document.getElementById('heroEyebrow').textContent = cfg.heroEyebrow;
+      document.getElementById('heroTitle').textContent = cfg.heroTitle;
+      document.getElementById('heroRoleText').textContent = cfg.heroText;
+      setAction(document.getElementById('primaryHeroAction'), cfg.primaryAction);
+      setAction(document.getElementById('secondaryHeroAction'), cfg.secondaryAction);
+      renderDashboardStats(cfg.stats);
+      document.getElementById('dashboardPrimaryTitle').textContent = cfg.primaryTitle;
+      document.getElementById('dashboardPrimaryText').textContent = cfg.primaryText;
+      setAction(document.getElementById('dashboardPrimaryLink'), cfg.primaryLink);
+      document.getElementById('dashboardSecondaryTitle').textContent = cfg.secondaryTitle;
+      document.getElementById('dashboardSecondaryText').textContent = cfg.secondaryText;
+      setAction(document.getElementById('dashboardSecondaryLink'), cfg.secondaryLink);
+      renderRolePrimary(role);
+      renderRoleSecondary(role);
+      document.getElementById('dashboardSidebar').innerHTML = role === 'customer' ? customerSidebarHTML() : role === 'curator' ? curatorSidebarHTML() : expertSidebarHTML();
+      document.querySelector('.nav-btn[data-view="tasks"]').textContent = cfg.nav.tasks;
+      document.querySelector('.nav-btn[data-view="projects"]').textContent = cfg.nav.projects;
+      document.querySelector('.nav-btn[data-view="experts"]').textContent = cfg.nav.experts;
+      updateRolePageCopy(role);
+      renderTaskGrid();
+      if (currentTask) configureTaskDrawerAction();
+      if (announce) toast(`Роль переключена: ${cfg.label}`);
+    }
+
+    function showView(name) {
+      if (!views.includes(name)) return;
+      views.forEach(v => {
+        document.getElementById(`view-${v}`).hidden = v !== name;
+        document.querySelector(`.nav-btn[data-view="${v}"]`)?.classList.toggle('active', v === name);
+      });
+      window.scrollTo({top:0,behavior:'smooth'});
+      history.replaceState(null,'',`#${name}`);
+    }
+
+    function applyTaskFilters() {
+      const q = (document.getElementById('taskSearch')?.value || '').trim().toLowerCase();
+      const sector = document.getElementById('sectorFilter')?.value || 'all';
+      const region = document.getElementById('regionFilter')?.value || 'all';
+      const status = document.getElementById('statusFilter')?.value || 'all';
+      const cards = [...document.querySelectorAll('#taskGrid .task-card')];
+      let visible = 0;
+      cards.forEach(card => {
+        const ok = (!q || card.dataset.search.includes(q)) && (sector==='all' || card.dataset.sector===sector) && (region==='all' || card.dataset.region===region) && (status==='all' || card.dataset.status.split(' ').includes(status));
+        card.hidden = !ok;
+        if (ok) visible++;
+      });
+      document.getElementById('taskResultCount').textContent = `Найдено задач: ${visible}`;
+      document.getElementById('taskEmpty').hidden = visible !== 0;
+    }
+
+    function openTask(id) {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+      currentTask = task;
+      document.getElementById('drawerTitle').textContent = task.title;
+      document.getElementById('drawerSummary').textContent = task.summary;
+      document.getElementById('drawerMeta').innerHTML = [
+        ['Источник',task.source],['Срок',task.term],['Уровень',task.level],['Ресурсы',task.resource]
+      ].map(([k,v])=>`<div class="detail-box"><small>${esc(k)}</small><strong>${esc(v)}</strong></div>`).join('');
+      document.getElementById('drawerQuestions').innerHTML = task.questions.map(([q,a],i)=>`<article class="question"><b>${i+1}. ${esc(q)}</b><p>${esc(a)}</p></article>`).join('');
+      const customerLink = document.getElementById('drawerCustomer');
+      customerLink.textContent = task.customer;
+      customerLink.href = task.customerId ? `zakazchik.html#${task.customerId}` : 'zakazchik.html';
+      document.getElementById('drawerCustomerRating').textContent = task.customerRating;
+      document.getElementById('drawerProjectRating').textContent = task.rating;
+      configureTaskDrawerAction();
+      const backdrop = document.getElementById('taskDrawer');
+      backdrop.classList.add('open');
+      backdrop.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+      setTimeout(()=>document.getElementById('closeDrawer').focus(),120);
+    }
+
+    function closeTask() {
+      const backdrop = document.getElementById('taskDrawer');
+      backdrop.classList.remove('open');
+      backdrop.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+
+    function toast(message) {
+      const el = document.getElementById('toast');
+      el.textContent = message;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(()=>el.classList.remove('show'),2400);
+    }
+
+    function generateHeatmap() {
+      const heat = document.getElementById('heatmap');
+      let seed = 314159;
+      const rand = () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
+      let html = '';
+      for (let i=0;i<364;i++) {
+        const r = rand();
+        let level = '';
+        if (r > .93) level = 'l4'; else if (r > .80) level = 'l3'; else if (r > .61) level = 'l2'; else if (r > .38) level = 'l1';
+        const count = level==='l4'?4:level==='l3'?3:level==='l2'?2:level==='l1'?1:0;
+        html += `<span class="heat-cell ${level}" title="${count} подтверждённых вкладов"></span>`;
+      }
+      heat.innerHTML = html;
+    }
+
+    function updateKanbanCounts() {
+      document.querySelectorAll('.kanban-column').forEach(col => {
+        col.querySelector('.kanban-count').textContent = col.querySelectorAll('.kanban-card').length;
+      });
+    }
+
+    function initKanban() {
+      let dragged = null;
+      document.querySelectorAll('.kanban-card').forEach(card => {
+        card.addEventListener('dragstart', () => { dragged = card; card.style.opacity = '.45'; });
+        card.addEventListener('dragend', () => { card.style.opacity = ''; dragged = null; document.querySelectorAll('.kanban-column').forEach(c=>c.classList.remove('drag-over')); });
+      });
+      document.querySelectorAll('.kanban-column').forEach(col => {
+        col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over'); });
+        col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+        col.addEventListener('drop', e => {
+          e.preventDefault();
+          col.classList.remove('drag-over');
+          if (dragged) {
+            col.querySelector('.kanban-cards').appendChild(dragged);
+            updateKanbanCounts();
+            toast('Статус работы обновлён');
+          }
+        });
+      });
+    }
+
+    function initRating() {
+      document.querySelectorAll('.star-picker').forEach(picker => {
+        for (let i=1;i<=5;i++) {
+          const b = document.createElement('button');
+          b.type='button'; b.textContent='★'; b.setAttribute('aria-label',`${i} из 5`); b.dataset.value=i;
+          b.addEventListener('click',()=>{
+            picker.dataset.selected=i;
+            picker.querySelectorAll('button').forEach(x=>x.classList.toggle('active',Number(x.dataset.value)<=i));
+          });
+          picker.appendChild(b);
+        }
+      });
+    }
+
+    document.addEventListener('click', e => {
+      const nav = e.target.closest('[data-view]');
+      if (nav) showView(nav.dataset.view);
+      const go = e.target.closest('[data-go]');
+      if (go) { e.preventDefault(); showView(go.dataset.go); }
+      const open = e.target.closest('[data-open-task]');
+      if (open) openTask(open.dataset.openTask);
+      const demo = e.target.closest('[data-demo]');
+      if (demo) toast('Демонстрационное действие: функция предусмотрена в продакшен-версии');
+    });
+
+    ['taskSearch','sectorFilter','regionFilter','statusFilter'].forEach(id => document.getElementById(id)?.addEventListener(id==='taskSearch'?'input':'change',applyTaskFilters));
+    document.getElementById('resetFilters').addEventListener('click',()=>{document.getElementById('taskSearch').value='';document.getElementById('sectorFilter').value='all';document.getElementById('regionFilter').value='all';document.getElementById('statusFilter').value='all';applyTaskFilters();});
+    document.getElementById('closeDrawer').addEventListener('click',closeTask);
+    document.getElementById('taskDrawer').addEventListener('click',e=>{if(e.target===e.currentTarget)closeTask();});
+    document.getElementById('applyTask').addEventListener('click',e=>{
+      const action = e.currentTarget.dataset.roleAction;
+      if (action === 'edit') {
+        toast(`Открыт режим редактирования ${currentTask?.id || 'задачи'} — демонстрация прототипа`);
+      } else if (action === 'review') {
+        e.currentTarget.textContent = 'Проверка начата';
+        e.currentTarget.disabled = true;
+        toast(`${currentTask?.id || 'Задача'} добавлена в работу куратора`);
+      } else {
+        e.currentTarget.textContent = 'Заявка отправлена';
+        e.currentTarget.disabled = true;
+        toast(`Заявка на ${currentTask?.id || 'задачу'} отправлена заказчику`);
+      }
+    });
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeTask();document.getElementById('ratingModal').classList.remove('open');}});
+
+    document.querySelectorAll('[data-workspace]').forEach(btn=>btn.addEventListener('click',()=>{
+      const mode=btn.dataset.workspace;
+      document.querySelectorAll('[data-workspace]').forEach(b=>{b.classList.toggle('active',b===btn);b.setAttribute('aria-selected',b===btn?'true':'false');});
+      document.getElementById('workspace-kanban').hidden=mode!=='kanban';
+      document.getElementById('workspace-gantt').hidden=mode!=='gantt';
+    }));
+
+    const ratingModal=document.getElementById('ratingModal');
+    document.getElementById('openRating').addEventListener('click',()=>{ratingModal.classList.add('open');ratingModal.setAttribute('aria-hidden','false');});
+    document.getElementById('cancelRating').addEventListener('click',()=>{ratingModal.classList.remove('open');ratingModal.setAttribute('aria-hidden','true');});
+    ratingModal.addEventListener('click',e=>{if(e.target===ratingModal){ratingModal.classList.remove('open');ratingModal.setAttribute('aria-hidden','true');}});
+    document.getElementById('submitRating').addEventListener('click',()=>{
+      const complete=[...document.querySelectorAll('.star-picker')].every(p=>p.dataset.selected);
+      if(!complete){toast('Поставьте оценки по всем трём критериям');return;}
+      ratingModal.classList.remove('open');ratingModal.setAttribute('aria-hidden','true');toast('Спасибо. Отзыв сохранён до взаимной публикации.');
+    });
+
+    document.addEventListener('rsv:role-change', e => applyRole(e.detail.role, e.detail.announce));
+    currentRole = RSVNav.getRole();
+
+    renderTaskGrid();
+    renderExperts();
+    renderCustomers();
+    generateHeatmap();
+    initKanban();
+    initRating();
+    RSVNav.initTopbar('proektny-lift');
+    applyRole(currentRole, false);
+    const initial = location.hash.replace('#','');
+    if (views.includes(initial)) showView(initial);
+  </script>
+</body>
+</html>

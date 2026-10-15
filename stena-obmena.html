@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#4762B6">
+  <title>Стена обмена — интерактивный прототип</title>
+  <link rel="stylesheet" href="assets/site.css">
+  <style>
+    :root{
+      --sky:#99C5E9; --blue:#4762B6; --violet:#605AA6; --coral:#DC5A5C;
+      --red:#DB1F26; --deep:#273A94; --mist:#DDE5E8; --paper:#F7F9FC;
+      --white:#fff; --ink:#1E2742; --muted:#65708B; --line:#E2E7EF;
+      --green:#25835B; --amber:#B76B12;
+      --shadow:0 16px 44px rgba(39,58,148,.10);
+      --r-xl:28px; --r-lg:20px; --r-md:14px; --max:1440px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0; min-width:320px; color:var(--ink); background:
+      linear-gradient(135deg,rgba(153,197,233,.18) 0,rgba(153,197,233,.18) 11%,transparent 11%) top left/420px 420px no-repeat,
+      var(--paper);
+      font-family:"Proxima Nova","Inter","Segoe UI",Arial,sans-serif; line-height:1.45
+    }
+    button,input,textarea,select{font:inherit}
+    button{cursor:pointer}
+    [hidden]{display:none!important}
+    :focus-visible{outline:3px solid rgba(39,58,148,.28);outline-offset:3px}
+
+    .top-ribbon{position:fixed;z-index:100;top:0;right:0;width:170px;height:12px;background:linear-gradient(90deg,var(--blue) 0 35%,var(--violet) 35% 68%,var(--coral) 68%);clip-path:polygon(14% 0,100% 0,100% 100%,0 100%);pointer-events:none}
+    .header{position:sticky;top:0;z-index:80;background:rgba(255,255,255,.94);backdrop-filter:blur(18px);border-bottom:1px solid rgba(71,98,182,.12)}
+    .header-in{max-width:var(--max);min-height:78px;margin:0 auto;padding:12px 28px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:26px}
+    .brand{display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit}
+    .rsv-mark{position:relative;width:88px;height:51px;flex:0 0 auto;font-style:italic;font-size:8.5px;line-height:1;transform:rotate(-1deg)}
+    .rsv-mark span{position:absolute;right:0;padding:4px 8px 3px;transform:skew(-9deg);white-space:nowrap;box-shadow:0 2px 5px rgba(30,39,66,.09)}
+    .rsv-mark span>b{display:inline-block;transform:skew(9deg);font-weight:600}
+    .rsv-mark .m1{top:0;right:14px;color:#171717;background:#F3F3F4}
+    .rsv-mark .m2{top:17px;right:8px;color:#fff;background:var(--deep)}
+    .rsv-mark .m3{top:34px;color:#fff;background:#D83358}
+    .product{display:flex;flex-direction:column;line-height:1.05}
+    .product strong{font-size:19px;letter-spacing:-.02em}
+    .product small{margin-top:5px;color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+    .nav{display:flex;align-items:center;justify-content:center;gap:5px}
+    .nav button{border:0;background:transparent;color:var(--muted);padding:10px 13px;border-radius:12px;font-weight:700}
+    .nav button:hover,.nav button.active{color:var(--deep);background:rgba(71,98,182,.09)}
+    .actions{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+    .role{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:9px 34px 9px 11px}
+    .avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--blue),var(--violet));font-weight:900}
+    .bell{width:40px;height:40px;border:1px solid var(--line);border-radius:50%;background:#fff;color:var(--deep);position:relative}
+    .bell:after{content:"";position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--red);border:2px solid #fff}
+
+    main{max-width:var(--max);margin:0 auto;padding:28px 28px 72px}
+    .view{animation:in .28s ease both}
+    @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    .card{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:0 10px 26px rgba(39,58,148,.045)}
+    .btn{border:0;border-radius:13px;padding:11px 16px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.18s;text-decoration:none}
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{color:#fff;background:var(--deep);box-shadow:0 8px 22px rgba(39,58,148,.2)}
+    .btn-soft{color:var(--deep);background:rgba(71,98,182,.09)}
+    .btn-light{color:var(--deep);background:#fff}
+    .btn-outline{color:var(--deep);background:#fff;border:1px solid rgba(71,98,182,.25)}
+    .btn-small{padding:8px 11px;border-radius:11px;font-size:13px}
+    .tag{display:inline-flex;align-items:center;min-height:25px;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:850;background:rgba(71,98,182,.08);color:var(--deep)}
+    .tag.green{color:var(--green);background:rgba(37,131,91,.10)}
+    .tag.coral{color:#9C3A3C;background:rgba(220,90,92,.11)}
+    .tag.amber{color:var(--amber);background:rgba(183,107,18,.11)}
+    .tag.gray{color:var(--muted);background:#F0F3F7}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+    .eyebrow:before{content:"";width:24px;height:3px;background:currentColor;border-radius:3px;opacity:.75}
+
+    .hero{position:relative;overflow:hidden;min-height:330px;padding:46px 52px;border-radius:var(--r-xl);color:#fff;background:linear-gradient(135deg,var(--deep),var(--blue) 58%,var(--violet));box-shadow:var(--shadow);display:grid;grid-template-columns:1.2fr .8fr;gap:30px;align-items:center}
+    .hero:before,.hero:after{content:"";position:absolute;width:480px;height:86px;right:-135px;transform:rotate(-38deg);opacity:.92}
+    .hero:before{top:32px;background:var(--sky)} .hero:after{top:126px;background:var(--coral)}
+    .hero-copy{position:relative;z-index:2;max-width:760px}
+    .hero h1{margin:14px 0 16px;font-size:clamp(38px,5vw,66px);line-height:.98;letter-spacing:-.045em}
+    .hero p{margin:0;max-width:680px;color:rgba(255,255,255,.87);font-size:18px}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:27px}
+    .hero-wall{position:relative;z-index:2;min-height:240px;display:grid;grid-template-columns:repeat(3,1fr);gap:9px;align-items:center;transform:rotate(-2deg)}
+    .hero-col{padding:12px;border-radius:16px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.20);backdrop-filter:blur(8px)}
+    .hero-col strong{display:block;margin-bottom:10px;font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+    .sticky{margin:8px 0;padding:10px;border-radius:5px;box-shadow:0 7px 18px rgba(0,0,0,.15);color:var(--ink);font-size:11px;font-weight:800;transform:rotate(var(--rot,1deg))}
+    .sticky.ask{background:#FF9E9E}.sticky.give{background:#83D8E5}.sticky.done{background:#CBEA91}
+
+    .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:18px}
+    .stat{padding:19px;min-height:116px;position:relative;overflow:hidden}
+    .stat:after{content:"";position:absolute;right:-28px;bottom:-36px;width:90px;height:90px;border-radius:50%;background:var(--accent,var(--sky));opacity:.16}
+    .stat small{color:var(--muted);font-weight:700}
+    .stat strong{display:block;margin:9px 0 3px;font-size:32px;letter-spacing:-.04em}
+    .stat span{color:var(--green);font-size:12px;font-weight:800}
+
+    .section-head{margin:36px 0 17px;display:flex;align-items:flex-end;justify-content:space-between;gap:18px}
+    .section-head h2{margin:0;font-size:28px;letter-spacing:-.03em}
+    .section-head p{margin:6px 0 0;color:var(--muted)}
+    .section-actions{display:flex;flex-wrap:wrap;gap:8px}
+
+    .wall{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .wall-column{padding:15px;background:#F1F4F8;border:1px solid var(--line);border-radius:18px;min-height:460px}
+    .wall-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+    .wall-head strong{font-size:14px;letter-spacing:.06em}
+    .wall-count{min-width:26px;height:26px;padding:0 7px;border-radius:999px;display:grid;place-items:center;background:#fff;color:var(--muted);font-size:11px;font-weight:900}
+    .wall-cards{display:grid;gap:10px}
+    .exchange-card{position:relative;padding:15px;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:0 7px 16px rgba(39,58,148,.05);transition:.18s}
+    .exchange-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+    .exchange-card.ask{border-top:4px solid var(--coral)}
+    .exchange-card.give{border-top:4px solid var(--sky)}
+    .exchange-card.done{border-top:4px solid #79B95B}
+    .exchange-card h3{margin:8px 0 7px;font-size:15px;line-height:1.3}
+    .exchange-card p{margin:0;color:var(--muted);font-size:12px}
+    .card-meta{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-top:13px;padding-top:11px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+    .mini-person{display:flex;align-items:center;gap:7px}
+    .mini-avatar{width:26px;height:26px;border-radius:9px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--blue),var(--violet));font-size:9px;font-weight:900}
+    .match-pill{padding:5px 8px;border-radius:999px;background:rgba(37,131,91,.09);color:var(--green);font-weight:900}
+
+    .page-title{position:relative;overflow:hidden;padding:28px 30px;border-radius:var(--r-xl);background:#fff;border:1px solid var(--line)}
+    .page-title:after{content:"";position:absolute;width:240px;height:68px;right:-58px;top:18px;transform:rotate(-34deg);background:linear-gradient(90deg,var(--blue),var(--violet),var(--coral))}
+    .page-title>div{position:relative;z-index:1;max-width:820px}
+    .page-title h1{margin:0;font-size:34px;letter-spacing:-.03em}
+    .page-title p{margin:7px 0 0;color:var(--muted)}
+
+    .two-col{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,.65fr);gap:18px;align-items:start;margin-top:18px}
+    .filter-card{padding:15px;display:grid;grid-template-columns:1.3fr .75fr .75fr auto;gap:9px;align-items:center}
+    .field{width:100%;min-height:43px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;color:var(--ink)}
+    textarea.field{min-height:92px;resize:vertical;line-height:1.45}
+    .match-list,.project-list,.expert-grid{display:grid;gap:12px}
+    .match-card{padding:18px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px}
+    .match-card h3{margin:8px 0 6px;font-size:17px}
+    .match-card p{margin:0;color:var(--muted);font-size:13px}
+    .match-score{min-width:74px;text-align:center;border-radius:16px;padding:11px 9px;color:var(--deep);background:rgba(153,197,233,.24);font-size:22px;font-weight:950}
+    .match-score small{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}
+    .reason{margin-top:12px;padding:10px 12px;border-radius:12px;color:var(--deep);background:linear-gradient(90deg,rgba(153,197,233,.2),rgba(96,90,166,.06));font-size:12px}
+    .match-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;padding-top:12px;border-top:1px solid var(--line)}
+
+    .operator-box{padding:18px}
+    .operator-box h3{margin:0 0 4px}
+    .operator-box>p{margin:0 0 14px;color:var(--muted);font-size:12px}
+    .queue-row{padding:12px 0;border-top:1px solid var(--line)}
+    .queue-row:first-of-type{border-top:0}
+    .queue-row strong{display:block;font-size:13px}
+    .queue-row small{color:var(--muted)}
+    .queue-actions{display:flex;gap:7px;margin-top:8px}
+
+    .project-card{padding:18px}
+    .project-top{display:flex;align-items:flex-start;justify-content:space-between;gap:15px}
+    .project-card h3{margin:8px 0 6px}
+    .project-card p{margin:0;color:var(--muted);font-size:12px}
+    .progress{height:9px;background:#E9EDF3;border-radius:999px;overflow:hidden;margin:15px 0 8px}
+    .progress span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--violet));border-radius:inherit}
+    .sprints{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:13px}
+    .sprint{padding:10px;border-radius:12px;background:#F5F7FB;font-size:11px}
+    .sprint strong{display:block;margin-bottom:3px}
+    .sprint.done{background:rgba(37,131,91,.08);color:var(--green)}
+    .sprint.active{background:rgba(71,98,182,.10);color:var(--deep)}
+    .project-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+    .points{font-weight:900;color:var(--deep)}
+
+    .expert-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .expert-card{padding:18px}
+    .expert-head{display:flex;gap:12px;align-items:flex-start}
+    .expert-avatar{width:58px;height:58px;border-radius:17px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--blue),var(--violet));font-weight:950}
+    .expert-card h3{margin:0;font-size:16px}
+    .expert-card p{margin:3px 0 0;color:var(--muted);font-size:12px}
+    .expert-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+    .expert-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:13px;padding-top:13px;border-top:1px solid var(--line)}
+    .expert-stats div{font-size:10px;color:var(--muted)}
+    .expert-stats strong{display:block;color:var(--ink);font-size:16px}
+    .rating{color:#F2A700;letter-spacing:-1px}
+    .privacy{margin-top:11px;padding:9px 10px;border-radius:11px;background:#F5F7FB;color:var(--muted);font-size:11px}
+
+    .profile{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:20px;align-items:center;padding:24px;margin-top:18px}
+    .profile .expert-avatar{width:88px;height:88px;border-radius:24px;font-size:28px}
+    .profile h2{margin:0;font-size:27px}
+    .profile p{margin:6px 0 11px;color:var(--muted)}
+    .score-box{min-width:215px;padding:16px;border-radius:18px;background:linear-gradient(135deg,rgba(153,197,233,.28),rgba(96,90,166,.08))}
+    .score-box small{color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+    .score-box strong{display:block;margin:5px 0 3px;font-size:28px}
+    .profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+    .profile-card{padding:19px}
+    .profile-card h3{margin:0 0 13px}
+    .info-row{padding:11px 0;border-top:1px solid var(--line)}
+    .info-row:first-of-type{border-top:0}
+    .info-row small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em}
+    .info-row strong{display:block;margin-top:4px;font-size:13px}
+    .channels{display:grid;gap:9px}
+    .channel{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border-radius:12px;background:#F5F7FB}
+    .switch{width:42px;height:24px;border:0;border-radius:999px;background:#CDD4DF;padding:3px;transition:.18s}
+    .switch:before{content:"";display:block;width:18px;height:18px;border-radius:50%;background:#fff;transition:.18s}
+    .switch.on{background:var(--deep)} .switch.on:before{transform:translateX(18px)}
+
+    .rank-table{overflow:hidden}
+    .rank-row{display:grid;grid-template-columns:55px minmax(0,1fr) 110px 100px 90px;gap:12px;align-items:center;padding:13px 17px;border-top:1px solid var(--line)}
+    .rank-row:first-child{border-top:0;background:#F5F7FB;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em;font-weight:800}
+    .rank-pos{font-weight:950;font-size:18px;color:var(--deep)}
+    .rank-person{display:flex;align-items:center;gap:9px}
+    .rank-person .mini-avatar{width:32px;height:32px;border-radius:10px}
+    .rank-points{font-weight:950;color:var(--deep)}
+
+    .bot-fab{position:fixed;z-index:95;right:26px;bottom:26px;width:58px;height:58px;border:0;border-radius:19px;color:#fff;background:linear-gradient(135deg,var(--deep),var(--violet));box-shadow:0 18px 38px rgba(39,58,148,.32);font-size:24px}
+    .bot{position:fixed;z-index:96;right:26px;bottom:96px;width:min(390px,calc(100vw - 32px));height:540px;max-height:calc(100vh - 130px);display:none;grid-template-rows:auto 1fr auto;border-radius:22px;background:#fff;border:1px solid var(--line);box-shadow:0 28px 75px rgba(17,26,52,.23);overflow:hidden}
+    .bot.open{display:grid}
+    .bot-head{padding:15px 17px;color:#fff;background:linear-gradient(135deg,var(--deep),var(--blue));display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .bot-head strong{display:block}.bot-head small{opacity:.82}
+    .bot-head button{border:0;background:rgba(255,255,255,.13);color:#fff;width:32px;height:32px;border-radius:50%}
+    .bot-thread{overflow-y:auto;padding:14px;background:#F7F9FC;display:grid;align-content:start;gap:10px}
+    .bubble{max-width:86%;padding:10px 12px;border-radius:14px;background:#fff;border:1px solid var(--line);font-size:12px}
+    .bubble.me{justify-self:end;color:#fff;background:var(--deep);border-color:var(--deep)}
+    .quick{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+    .quick button{border:1px solid rgba(71,98,182,.22);background:#fff;color:var(--deep);border-radius:999px;padding:7px 9px;font-size:11px;font-weight:800}
+    .bot-compose{padding:10px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:8px}
+    .bot-compose input{border:1px solid var(--line);border-radius:11px;padding:10px}
+    .bot-compose button{border:0;border-radius:11px;background:var(--deep);color:#fff;padding:0 14px;font-weight:900}
+
+    .modal{position:fixed;z-index:120;inset:0;padding:22px;background:rgba(17,26,52,.48);display:none;place-items:center;backdrop-filter:blur(4px)}
+    .modal.open{display:grid}
+    .sheet{width:min(760px,100%);max-height:calc(100vh - 44px);overflow:auto;background:#fff;border-radius:24px;box-shadow:0 30px 80px rgba(17,26,52,.25)}
+    .sheet-head{position:sticky;top:0;z-index:2;padding:20px 22px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.97);backdrop-filter:blur(14px);display:flex;align-items:flex-start;justify-content:space-between;gap:15px}
+    .sheet-head h2{margin:0}.sheet-head p{margin:5px 0 0;color:var(--muted);font-size:12px}
+    .close{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:#fff;font-size:20px}
+    .sheet-body{padding:20px 22px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+    .form-group{display:grid;gap:6px}
+    .form-group.full{grid-column:1/-1}
+    .form-group label{font-size:12px;font-weight:850}
+    .form-group small{color:var(--muted)}
+    .radio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .radio{padding:11px;border:1px solid var(--line);border-radius:12px;background:#fff;text-align:left}
+    .radio.active{border-color:var(--deep);background:rgba(71,98,182,.07)}
+    .sheet-actions{position:sticky;bottom:0;padding:13px 22px;border-top:1px solid var(--line);background:rgba(255,255,255,.97);display:flex;justify-content:flex-end;gap:9px}
+
+    .drawer-bg{position:fixed;z-index:110;inset:0;background:rgba(17,26,52,.42);display:none}
+    .drawer-bg.open{display:block}
+    .drawer{position:absolute;top:0;right:0;width:min(680px,100%);height:100%;overflow:auto;background:#fff;box-shadow:-24px 0 60px rgba(17,26,52,.18)}
+    .drawer-head{position:sticky;top:0;z-index:2;padding:20px 22px;background:rgba(255,255,255,.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:14px}
+    .drawer-head h2{margin:0;font-size:23px}.drawer-body{padding:20px 22px 90px}
+    .detail-block{padding:14px;border-radius:14px;background:#F5F7FA;margin-top:11px}
+    .detail-block small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em}
+    .detail-block strong{display:block;margin-top:5px}
+    .chat-thread{margin-top:14px;padding:13px;border:1px solid var(--line);border-radius:14px;background:#F7F9FC;display:grid;gap:9px;max-height:270px;overflow:auto}
+    .msg{display:grid;grid-template-columns:32px 1fr;gap:8px;align-items:start}
+    .msg.me{grid-template-columns:1fr 32px}
+    .msg.me .mini-avatar{grid-column:2}.msg.me .msg-body{grid-column:1;grid-row:1;justify-self:end}
+    .msg-body{max-width:90%}.msg-body small{display:block;margin:0 4px 3px;color:var(--muted)}
+    .msg-text{padding:9px 11px;border-radius:4px 12px 12px 12px;background:#fff;border:1px solid var(--line);font-size:12px}
+    .msg.me .msg-text{color:#fff;background:var(--deep);border-color:var(--deep);border-radius:12px 4px 12px 12px}
+    .composer{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:9px}
+    .composer input{border:1px solid var(--line);border-radius:11px;padding:10px}
+    .composer button{border:0;border-radius:11px;background:var(--deep);color:#fff;padding:0 13px;font-weight:900}
+
+    .toast{position:fixed;z-index:160;left:50%;bottom:24px;transform:translate(-50%,18px);opacity:0;pointer-events:none;padding:11px 15px;border-radius:12px;color:#fff;background:var(--ink);box-shadow:0 14px 35px rgba(17,26,52,.25);transition:.2s;font-size:13px}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    .note{margin-top:36px;padding:16px 20px;border-radius:16px;background:rgba(221,229,232,.55);color:var(--muted);font-size:12px;text-align:center}
+
+    @media(max-width:1120px){
+      .header-in{grid-template-columns:auto auto}.nav{grid-column:1/-1;grid-row:2;overflow:auto;justify-content:flex-start}
+      .hero{grid-template-columns:1fr .6fr}.stats{grid-template-columns:repeat(2,1fr)}
+      .wall{grid-template-columns:1fr}.wall-column{min-height:0}
+      .expert-grid{grid-template-columns:repeat(2,1fr)}
+      .two-col{grid-template-columns:1fr}.filter-card{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:760px){
+      .header-in,main{padding-left:16px;padding-right:16px}.header-in{gap:12px}
+      .product small{display:none}.role{max-width:130px}.bell{display:none}
+      .hero{padding:34px 24px;grid-template-columns:1fr}.hero-wall{min-height:190px}
+      .stats{grid-template-columns:1fr 1fr}.expert-grid{grid-template-columns:1fr}
+      .filter-card{grid-template-columns:1fr}.profile{grid-template-columns:auto 1fr}.score-box{grid-column:1/-1}
+      .profile-grid{grid-template-columns:1fr}.rank-row{grid-template-columns:42px 1fr 78px}.rank-row>*:nth-child(4),.rank-row>*:nth-child(5){display:none}
+      .sprints{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.form-group.full{grid-column:auto}
+      .radio-grid{grid-template-columns:1fr}.bot{right:16px;bottom:86px}.bot-fab{right:16px;bottom:16px}
+    }
+    @media(max-width:500px){
+      .rsv-mark{display:none}.header-in{grid-template-columns:1fr auto}.actions{gap:6px}.avatar{display:none}
+      .stats{grid-template-columns:1fr}.hero h1{font-size:42px}.hero-wall{grid-template-columns:1fr}.hero-col:nth-child(2),.hero-col:nth-child(3){display:none}
+      .section-head{align-items:flex-start;flex-direction:column}.sprints{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<div class="top-ribbon"></div>
+<header class="site-topbar">
+  <div class="site-topbar-inner">
+    <a class="site-brand" href="index.html" aria-label="Проектный лифт, на главную">
+      <div class="rsv-mark" aria-label="Россия — страна возможностей">
+        <span class="m1"><b>РОССИЯ</b></span><span class="m2"><b>СТРАНА</b></span><span class="m3"><b>ВОЗМОЖНОСТЕЙ</b></span>
+      </div>
+      <span class="site-product"><strong>Стена обмена</strong><small>экспертиза · ресурсы · проекты</small></span>
+    </a>
+    <nav class="site-nav" aria-label="Разделы сайта">
+      <a href="index.html" data-site-link="index">Главная</a>
+      <a href="proektny-lift.html" data-site-link="proektny-lift">Проектный лифт</a>
+      <a href="stena-obmena.html" data-site-link="stena-obmena">Стена обмена</a>
+      <a href="zakazchik.html" data-site-link="zakazchik">Заказчики</a>
+    </nav>
+    <div class="site-actions">
+      <label class="sr-only" for="globalRoleSelect">Роль</label>
+      <select class="role-select" id="globalRoleSelect">
+        <option value="expert">Я — Эксперт</option>
+        <option value="customer">Я — Заказчик</option>
+        <option value="curator">Я — Куратор</option>
+      </select>
+      <button class="bell" aria-label="Уведомления">⌁</button>
+      <div class="site-avatar">АС</div>
+    </div>
+  </div>
+</header>
+<div class="site-subbar">
+  <div class="site-subbar-inner">
+    <nav class="nav" aria-label="Основная навигация">
+      <button class="active" data-nav="wall">Стена</button>
+      <button data-nav="matches">Матчи</button>
+      <button data-nav="mentorship">Наставничество</button>
+      <button data-nav="projects">Проекты</button>
+      <button data-nav="experts">Эксперты</button>
+      <button data-nav="rating">Рейтинг</button>
+      <button data-nav="profile">Профиль</button>
+    </nav>
+  </div>
+</div>
+
+<main>
+  <section class="view" id="view-wall">
+    <div class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">Сообщество, которое действует</span>
+        <h1>Прошу. Даю. Сделано.</h1>
+        <p>Находите нужную экспертизу, делитесь ресурсами и превращайте обмен внутри сообщества в реальные проекты с измеримым результатом.</p>
+        <div class="hero-actions">
+          <button class="btn btn-light" onclick="openCreate('ask')">Мне нужно</button>
+          <button class="btn btn-light" onclick="openCreate('give')">Могу помочь</button>
+          <button class="btn btn-soft" style="color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35)" onclick="openCreate('project')">Приглашаю в проект</button>
+        </div>
+      </div>
+      <div class="hero-wall" aria-label="Схема Стены обмена">
+        <div class="hero-col"><strong>Прошу</strong><div class="sticky ask" style="--rot:-2deg">Нужен эксперт по ГЧП</div><div class="sticky ask" style="--rot:2deg">Ищу партнёра в регионе</div></div>
+        <div class="hero-col"><strong>Даю</strong><div class="sticky give" style="--rot:1deg">Экспертиза в аналитике</div><div class="sticky give" style="--rot:-2deg">Контакты промышленности</div></div>
+        <div class="hero-col"><strong>Сделано</strong><div class="sticky done" style="--rot:2deg">Собрана команда</div><div class="sticky done" style="--rot:-1deg">Пилот запущен</div></div>
+      </div>
+    </div>
+
+    <div class="stats" id="dashboardStats"></div>
+
+    <div class="section-head">
+      <div><h2 id="wallTitle">Моя Стена обмена</h2><p id="wallSubtitle">Запросы, предложения и подтверждённые результаты — в одном потоке.</p></div>
+      <div class="section-actions">
+        <button class="btn btn-outline btn-small" onclick="openCreate('ask')">+ Запрос</button>
+        <button class="btn btn-outline btn-small" onclick="openCreate('give')">+ Предложение</button>
+        <button class="btn btn-primary btn-small" onclick="openCreate('project')">+ Проект</button>
+      </div>
+    </div>
+    <div class="wall" id="wallBoard"></div>
+    <div class="note">Интерактивный демонстрационный прототип. Все люди, проекты, оценки и показатели вымышлены.</div>
+  </section>
+
+  <section class="view" id="view-matches" hidden>
+    <div class="page-title"><div><span class="eyebrow" style="color:var(--deep)">Сопоставление</span><h1>Матчи по запросам и ресурсам</h1><p>Система сопоставляет профиль Эксперта с запросами и приглашениями. Оператор подтверждает выдачу релевантной части профиля.</p></div></div>
+    <div class="two-col">
+      <div>
+        <div class="card filter-card">
+          <input class="field" id="matchSearch" placeholder="Поиск по теме, компетенции, региону">
+          <select class="field" id="matchType"><option value="">Все типы</option><option value="request">Запрос ресурса</option><option value="project">Приглашение в проект</option></select>
+          <select class="field" id="matchStatus"><option value="">Все статусы</option><option value="new">Новый</option><option value="verified">Проверен</option></select>
+          <button class="btn btn-soft btn-small" onclick="renderMatches()">Применить</button>
+        </div>
+        <div class="match-list" id="matchList" style="margin-top:12px"></div>
+      </div>
+      <aside class="card operator-box" id="operatorPanel">
+        <h3>Очередь верификации</h3>
+        <p>Результат автоматического сопоставления перед отправкой автору запроса.</p>
+        <div id="operatorQueue"></div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="view" id="view-mentorship" hidden>
+    <div class="page-title"><div><span class="eyebrow" style="color:var(--deep)">Наставничество</span><h1>Взаимный выбор, тестовый период, соглашение</h1><p>Наставник публикует профиль с опытом, темами и форматом поддержки. Подопечный размещает запрос. При совпадении ожиданий создаётся наставническое соглашение.</p></div></div>
+    <div class="two-col">
+      <div>
+        <div class="section-head"><div><h2>Наставники</h2><p>Опыт, темы и формат поддержки — видны до отклика.</p></div><button class="btn btn-outline btn-small" onclick="toast('Форма публикации профиля наставника — демонстрация прототипа')">+ Стать наставником</button></div>
+        <div class="expert-grid" id="mentorGrid" style="margin-bottom:24px"></div>
+        <div class="section-head"><div><h2>Запросы подопечных</h2><p>Что хотят освоить или разобрать участники сообщества.</p></div><button class="btn btn-outline btn-small" onclick="toast('Форма запроса на наставничество — демонстрация прототипа')">+ Запрос на наставничество</button></div>
+        <div class="match-list" id="menteeRequestList"></div>
+      </div>
+      <aside class="card operator-box" id="mentorshipOperatorPanel">
+        <h3>Соглашения на проверке</h3>
+        <p>Куратор подтверждает переход из тестового периода в активное соглашение.</p>
+        <div id="mentorshipQueue"></div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="view" id="view-projects" hidden>
+    <div class="page-title"><div><span class="eyebrow" style="color:var(--deep)">Работа до результата</span><h1>Проекты Стены обмена</h1><p>Спринты, контроль продвижения, фиксация результата и начисление баллов участникам.</p></div></div>
+    <div class="section-head"><div><h2>Активные проекты</h2><p>Открывайте карточку проекта, смотрите спринты и обсуждение команды.</p></div><button class="btn btn-primary btn-small" onclick="openCreate('project')">+ Создать проект</button></div>
+    <div class="project-list" id="projectList"></div>
+  </section>
+
+  <section class="view" id="view-experts" hidden>
+    <div class="page-title"><div><span class="eyebrow" style="color:var(--deep)">Сообщество</span><h1>Эксперты</h1><p>Видимость профиля зависит от выбранного уровня доступа и релевантности конкретному запросу.</p></div></div>
+    <div class="card filter-card" style="margin-top:18px">
+      <input class="field" id="expertSearch" placeholder="Компетенция, организация, регион">
+      <select class="field"><option>Все регионы</option><option>Москва</option><option>Санкт-Петербург</option><option>Татарстан</option></select>
+      <select class="field"><option>Любой статус</option><option>Лидеры России</option><option>Эксперт РСВ</option><option>Наставник</option></select>
+      <button class="btn btn-soft btn-small" onclick="renderExperts()">Найти</button>
+    </div>
+    <div class="expert-grid" id="expertGrid" style="margin-top:14px"></div>
+  </section>
+
+  <section class="view" id="view-rating" hidden>
+    <div class="page-title"><div><span class="eyebrow" style="color:var(--deep)">Признание вклада</span><h1>Рейтинг Экспертов</h1><p>Баллы начисляются за подтверждённую помощь, участие в проектах, закрытие спринтов и достигнутый результат.</p></div></div>
+    <div class="section-head"><div><h2>Лидеры сообщества</h2><p>Рейтинг показывает вклад, а не популярность.</p></div><span class="tag green">Обновлено сегодня</span></div>
+    <div class="card rank-table" id="rankTable"></div>
+  </section>
+
+  <section class="view" id="view-profile" hidden>
+    <div class="page-title"><div><span class="eyebrow" style="color:var(--deep)">Профиль Эксперта</span><h1>Мой профиль</h1><p>Настройте, что предлагаете сообществу, что запрашиваете и кому видны ваши контакты.</p></div></div>
+    <div class="card profile">
+      <div class="expert-avatar">АС</div>
+      <div>
+        <h2>Александр Соколов</h2>
+        <p>Эксперт по развитию территорий · работаю над региональными инвестиционными проектами</p>
+        <div class="expert-tags"><span class="tag">Стратегия</span><span class="tag">ГЧП</span><span class="tag">Инвестиции</span><span class="tag">Региональное развитие</span></div>
+      </div>
+      <div class="score-box"><small>Статус в сообществе</small><strong>1 840 баллов</strong><span class="rating">★★★★★</span> <small>4,9 · 18 подтверждений</small></div>
+    </div>
+    <div class="profile-grid">
+      <div class="card profile-card">
+        <h3>Что я даю и что мне нужно</h3>
+        <div class="info-row"><small>Предлагаю</small><strong>Экспертиза по инвестиционным проектам, финансовым моделям и ГЧП; контакты региональных институтов развития.</strong></div>
+        <div class="info-row"><small>Запрашиваю</small><strong>Экспертов по промышленной кооперации и цифровым моделям производственных цепочек.</strong></div>
+        <div class="info-row"><small>Статус в проектах РСВ</small><strong>Лидеры России — финалист · Наставник проекта «Территория роста»</strong></div>
+        <div class="info-row"><small>Контакты</small><strong>Показывать после подтверждённого релевантного запроса</strong></div>
+        <button class="btn btn-soft btn-small" style="margin-top:12px" onclick="toast('Редактирование профиля открыто в демонстрационном режиме')">Редактировать профиль</button>
+      </div>
+      <div class="card profile-card">
+        <h3>Приватность и рассылки</h3>
+        <div class="info-row"><small>Уровень доступа</small><strong>Релевантная часть профиля — по совпадению запроса</strong></div>
+        <div class="channels">
+          <div class="channel"><span><strong>MAX</strong><br><small>Подходящие запросы и сообщения</small></span><button class="switch on" onclick="toggleSwitch(this)" aria-label="MAX"></button></div>
+          <div class="channel"><span><strong>Telegram</strong><br><small>Дублировать новые матчи</small></span><button class="switch on" onclick="toggleSwitch(this)" aria-label="Telegram"></button></div>
+          <div class="channel"><span><strong>Web</strong><br><small>Центр уведомлений</small></span><button class="switch on" onclick="toggleSwitch(this)" aria-label="Web"></button></div>
+          <div class="channel"><span><strong>Email</strong><br><small>Дайджест раз в неделю</small></span><button class="switch" onclick="toggleSwitch(this)" aria-label="Email"></button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<button class="bot-fab" id="botFab" aria-label="Открыть чат-бот">✦</button>
+<section class="bot" id="bot">
+  <div class="bot-head"><div><strong>Стена обмена</strong><small>Помогу оформить запрос или найти эксперта</small></div><button onclick="toggleBot()">×</button></div>
+  <div class="bot-thread" id="botThread">
+    <div class="bubble">Здравствуйте! Что вы хотите сделать?</div>
+    <div class="quick">
+      <button onclick="botQuick('Мне нужен эксперт')">Мне нужен эксперт</button>
+      <button onclick="botQuick('Могу помочь')">Могу помочь</button>
+      <button onclick="botQuick('Приглашаю в проект')">Приглашаю в проект</button>
+      <button onclick="botQuick('Покажи мои матчи')">Покажи мои матчи</button>
+    </div>
+  </div>
+  <form class="bot-compose" onsubmit="sendBot(event)"><input id="botInput" placeholder="Напишите сообщение…"><button>→</button></form>
+</section>
+
+<div class="modal" id="createModal" onclick="if(event.target===this) closeCreate()">
+  <div class="sheet">
+    <div class="sheet-head"><div><h2 id="createTitle">Новая запись</h2><p id="createSubtitle">Добавьте информацию на Стену обмена.</p></div><button class="close" onclick="closeCreate()">×</button></div>
+    <div class="sheet-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Тип записи</label>
+          <div class="radio-grid">
+            <button class="radio" data-kind="ask" onclick="setCreateKind('ask')"><strong>Прошу</strong><br><small>Нужны ресурс, экспертиза или контакты</small></button>
+            <button class="radio" data-kind="give" onclick="setCreateKind('give')"><strong>Даю</strong><br><small>Предлагаю ресурс, экспертизу или контакты</small></button>
+            <button class="radio" data-kind="project" onclick="setCreateKind('project')"><strong>Проект</strong><br><small>Приглашаю участника в проект</small></button>
+          </div>
+        </div>
+        <div class="form-group full"><label id="subjectLabel">Что вам нужно?</label><input class="field" id="createSubject" placeholder="Коротко сформулируйте запрос"></div>
+        <div class="form-group full"><label>Описание</label><textarea class="field" id="createText" placeholder="Добавьте контекст, ожидаемый результат и ограничения"></textarea></div>
+        <div class="form-group"><label>Сфера</label><select class="field" id="createArea"><option>Региональное развитие</option><option>Промышленность</option><option>Образование</option><option>IT и данные</option><option>Социальные проекты</option></select></div>
+        <div class="form-group"><label>Регион</label><input class="field" id="createRegion" placeholder="Например, Республика Татарстан"></div>
+        <div class="form-group full" id="projectExtra" hidden><label>Для проекта: что уже сделано и чего не хватает?</label><textarea class="field" id="createGap" placeholder="Опишите текущую стадию и дефицит команды"></textarea></div>
+      </div>
+    </div>
+    <div class="sheet-actions"><button class="btn btn-soft" onclick="closeCreate()">Отмена</button><button class="btn btn-primary" onclick="saveCreate()">Опубликовать</button></div>
+  </div>
+</div>
+
+<div class="drawer-bg" id="drawerBg" onclick="if(event.target===this) closeDrawer()">
+  <aside class="drawer">
+    <div class="drawer-head"><div><span class="tag" id="drawerTag">Матч</span><h2 id="drawerTitle">Карточка</h2></div><button class="close" onclick="closeDrawer()">×</button></div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="assets/site-nav.js"></script>
+<script>
+  const wallData = {
+    asks:[
+      {id:'a1',title:'Нужен эксперт по промышленной кооперации',text:'Ищем человека с опытом построения цепочек поставок для пилота в трёх регионах.',author:'Мария Орлова',initials:'МО',area:'Промышленность',match:94},
+      {id:'a2',title:'Ищу контакт института развития в Поволжье',text:'Нужна консультация по инструментам поддержки производственного проекта.',author:'Илья Крылов',initials:'ИК',area:'Инвестиции',match:87},
+      {id:'a3',title:'Нужна экспертиза по оценке социального эффекта',text:'Помощь с моделью измерения результатов проекта занятости молодёжи.',author:'Светлана Белова',initials:'СБ',area:'Социальные проекты',match:82}
+    ],
+    gives:[
+      {id:'g1',title:'Помогу с финансовой моделью ГЧП',text:'Могу разобрать структуру проекта, риски и модель возврата инвестиций.',author:'Александр Соколов',initials:'АС',area:'ГЧП',match:96},
+      {id:'g2',title:'Дам контакты экспертов по городской мобильности',text:'Есть рабочие контакты в нескольких регионах и профильных проектных офисах.',author:'Елена Лебедева',initials:'ЕЛ',area:'Городская среда',match:90},
+      {id:'g3',title:'Проведу аудит продуктовой гипотезы',text:'До 60 минут на разбор B2G-сервиса и формулировку плана следующего эксперимента.',author:'Денис Юдин',initials:'ДЮ',area:'IT и данные',match:88}
+    ],
+    done:[
+      {id:'d1',title:'Сформирована команда регионального пилота',text:'Через Стену найдено 4 эксперта; первый спринт закрыт в срок.',author:'Проект «Точка роста»',initials:'ТР',area:'Региональное развитие',match:null},
+      {id:'d2',title:'Получена экспертиза по финансовой модели',text:'Эксперт помог скорректировать модель и подготовить материалы к защите.',author:'Проект «Новая индустрия»',initials:'НИ',area:'Промышленность',match:null}
+    ]
+  };
+
+  const matches = [
+    {id:'m1',type:'request',status:'new',score:96,title:'Финансовая модель для инфраструктурного проекта',requester:'Команда «Территория 2030»',reason:'Совпали: ГЧП, финансовое моделирование, региональные проекты',privacy:'Показываем компетенции и статус; контакты — после подтверждения.',expert:'Александр Соколов'},
+    {id:'m2',type:'project',status:'verified',score:91,title:'Приглашение в проект по развитию промышленных кластеров',requester:'Проект «Новая индустрия»',reason:'Совпали: инвестиционные проекты, межрегиональная кооперация',privacy:'Профиль подтверждён оператором. Контакты доступны автору проекта.',expert:'Александр Соколов'},
+    {id:'m3',type:'request',status:'new',score:84,title:'Экспертиза по механикам институтов развития',requester:'Анна Власова',reason:'Совпали: региональное развитие, институты поддержки',privacy:'Доступна релевантная часть профиля без телефона и почты.',expert:'Александр Соколов'}
+  ];
+
+  const projects = [
+    {id:'p1',title:'Территория 2030: инвестиционный навигатор',desc:'Сервис маршрутизации региональных проектов по мерам поддержки.',progress:68,points:320,status:'В работе',sprints:[['Исследование','done'],['Прототип','done'],['Пилот','active'],['Масштабирование','']]},
+    {id:'p2',title:'Новая индустрия: карта кооперации',desc:'Поиск технологических связей между предприятиями трёх регионов.',progress:42,points:180,status:'В работе',sprints:[['Диагностика','done'],['Матчинг','active'],['Пилот',''],['Результат','']]},
+    {id:'p3',title:'Наставники для муниципальных команд',desc:'Экспертное сопровождение команд и обмен проверенными практиками.',progress:91,points:460,status:'Финиш',sprints:[['Отбор','done'],['Матчинг','done'],['Сессии','done'],['Итог','active']]}
+  ];
+
+  const experts = [
+    {name:'Александр Соколов',initials:'АС',role:'Региональное развитие · ГЧП',tags:['Инвестиции','Стратегия','ГЧП'],score:'4,9',points:1840,projects:7,privacy:'Профиль по релевантному запросу'},
+    {name:'Елена Лебедева',initials:'ЕЛ',role:'Городская среда · транспорт',tags:['Мобильность','Города','Данные'],score:'4,9',points:2110,projects:9,privacy:'Полный профиль по фильтрам'},
+    {name:'Денис Юдин',initials:'ДЮ',role:'Цифровые продукты · аналитика',tags:['Product','AI','B2G'],score:'4,8',points:1690,projects:8,privacy:'Профиль по релевантному запросу'},
+    {name:'Мария Орлова',initials:'МО',role:'Промышленная политика',tags:['Кластеры','Кооперация','Экспорт'],score:'4,8',points:1530,projects:6,privacy:'Анонимная подписка'},
+    {name:'Светлана Белова',initials:'СБ',role:'Социальные проекты',tags:['Impact','НКО','Молодёжь'],score:'4,7',points:1380,projects:5,privacy:'Полный профиль по фильтрам'},
+    {name:'Илья Крылов',initials:'ИК',role:'Институты развития',tags:['МСП','Инвестиции','Регион'],score:'4,7',points:1270,projects:5,privacy:'Профиль по релевантному запросу'}
+  ];
+
+  const mentors = [
+    {id:'mt1', initials:'НК', name:'Наталья Крылова', role:'Экс-замминистра, региональное развитие', topics:['Стратегия','Госуправление','Карьерный рост'], format:'1 встреча в 2 недели, онлайн', availability:'2 подопечных свободно'},
+    {id:'mt2', initials:'ДЮ', name:'Денис Юдин', role:'Продуктовый директор, цифровые сервисы', topics:['Product','Данные','B2G'], format:'Разбор кейсов, онлайн', availability:'1 подопечный свободно'},
+    {id:'mt3', initials:'ЕЛ', name:'Елена Лебедева', role:'Эксперт по городской мобильности', topics:['Города','Транспорт','Проекты'], format:'Сопровождение проекта', availability:'Набор закрыт'}
+  ];
+  const menteeRequests = [
+    {id:'mr1', initials:'ИК', name:'Илья Крылов', topic:'Переход от исполнения к управлению командой', text:'Хочу разобрать, как перейти от роли исполнителя к руководителю проектной команды.', format:'Онлайн, раз в 2 недели'},
+    {id:'mr2', initials:'СБ', name:'Светлана Белова', topic:'Защита социального проекта перед инвесторами', text:'Нужен разбор презентации и аргументации эффекта перед финансирующей стороной.', format:'1–2 встречи'}
+  ];
+  let mentorMatches = {};
+
+  function mentorshipStatusLabel(s){ return s==='draft' ? 'Черновик совпадения' : s==='trial' ? 'Тестовый период' : 'Соглашение активно'; }
+
+  function renderMentorship(){
+    document.getElementById('mentorGrid').innerHTML = mentors.map(m=>`<article class="card expert-card">
+      <div class="expert-head"><div class="expert-avatar">${m.initials}</div><div><h3>${m.name}</h3><p>${m.role}</p></div></div>
+      <div class="expert-tags">${m.topics.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      <div class="privacy" style="margin-top:11px">◉ ${m.format}</div><div class="privacy">◎ ${m.availability}</div>
+      <button class="btn btn-soft btn-small" style="margin-top:11px" onclick="proposeMentorship('${m.id}')">Предложить наставничество</button>
+    </article>`).join('');
+
+    document.getElementById('menteeRequestList').innerHTML = menteeRequests.map(r=>{
+      const status = mentorMatches[r.id];
+      return `<article class="card match-card"><div><div class="tag-row"><span class="tag">Запрос подопечного</span>${status?`<span class="tag ${status==='active'?'green':'amber'}">${mentorshipStatusLabel(status)}</span>`:''}</div>
+        <h3>${r.topic}</h3><p>${r.name} · ${r.format}</p><div class="reason"><strong>Контекст:</strong> ${r.text}</div></div>
+        <div class="match-actions">${role==='operator' ? '' : `<button class="btn btn-primary btn-small" onclick="respondMentorship('${r.id}')">${status?'Продолжить':'Откликнуться'}</button>`}</div>
+      </article>`;
+    }).join('');
+
+    renderMentorshipQueue();
+  }
+
+  function proposeMentorship(mentorId){
+    const open = menteeRequests.find(x=>!mentorMatches[x.id]);
+    if(!open){ toast('Все текущие запросы уже в работе'); return; }
+    mentorMatches[open.id]='draft';
+    renderMentorship();
+    toast('Предложение отправлено подопечному — статус: черновик совпадения');
+  }
+  function respondMentorship(requestId){
+    const cur = mentorMatches[requestId];
+    mentorMatches[requestId] = !cur ? 'draft' : 'trial';
+    renderMentorship();
+    toast(mentorMatches[requestId]==='draft' ? 'Отклик отправлен наставнику — статус: черновик совпадения' : 'Тестовый период начат');
+  }
+  function confirmMentorship(requestId){
+    mentorMatches[requestId]='active';
+    renderMentorship();
+    toast('Соглашение активно');
+  }
+  function renderMentorshipQueue(){
+    const panel = document.getElementById('mentorshipOperatorPanel');
+    panel.hidden = role !== 'operator';
+    const trial = menteeRequests.filter(r=>mentorMatches[r.id]==='trial');
+    document.getElementById('mentorshipQueue').innerHTML = trial.map(r=>`<div class="queue-row"><strong>${r.topic}</strong><small>Тестовый период завершён — подтвердить соглашение</small><div class="queue-actions"><button class="btn btn-primary btn-small" onclick="confirmMentorship('${r.id}')">Подтвердить соглашение</button></div></div>`).join('') || '<p style="color:var(--muted);font-size:12px">Пока нет соглашений, ожидающих подтверждения.</p>';
+  }
+
+  let role='expert', createKind='ask';
+
+  function nav(view){
+    document.querySelectorAll('.view').forEach(v=>v.hidden=true);
+    document.getElementById('view-'+view).hidden=false;
+    document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.nav===view));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  document.querySelectorAll('[data-nav]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();nav(el.dataset.nav)}));
+
+  function renderStats(){
+    const expert = [
+      ['Новых совпадений','8','+3 за неделю','--sky'],
+      ['Помог за месяц','6','4 подтверждены','--green'],
+      ['Проекты в работе','3','2 спринта на неделе','--violet'],
+      ['Баллы','1 840','▲ 120 за месяц','--coral']
+    ];
+    const operator = [
+      ['На верификации','14','5 новых сегодня','--coral'],
+      ['Совпадений > 85%','27','готовы к проверке','--sky'],
+      ['Активных проектов','38','7 требуют внимания','--violet'],
+      ['Экспертов в базе','1 246','+31 за месяц','--green']
+    ];
+    const data=role==='operator'?operator:expert;
+    document.getElementById('dashboardStats').innerHTML=data.map(x=>`<div class="card stat" style="--accent:var(${x[3]})"><small>${x[0]}</small><strong>${x[1]}</strong><span>${x[2]}</span></div>`).join('');
+    document.getElementById('wallTitle').textContent=role==='operator'?'Поток сообщества':'Моя Стена обмена';
+    document.getElementById('wallSubtitle').textContent=role==='operator'?'Запросы и предложения, которые система сопоставляет и передаёт на верификацию.':'Запросы, предложения и подтверждённые результаты — в одном потоке.';
+  }
+
+  function exchangeCard(x,kind){
+    return `<article class="exchange-card ${kind}" onclick="openWall('${x.id}','${kind}')">
+      <span class="tag ${kind==='ask'?'coral':kind==='give'?'':'green'}">${kind==='ask'?'Запрос':kind==='give'?'Предлагаю':'Результат'}</span>
+      <h3>${x.title}</h3><p>${x.text}</p>
+      <div class="card-meta"><div class="mini-person"><div class="mini-avatar">${x.initials}</div><span>${x.author}</span></div>${x.match?`<span class="match-pill">${x.match}% матч</span>`:'<span class="tag green">подтверждено</span>'}</div>
+    </article>`;
+  }
+  function renderWall(){
+    document.getElementById('wallBoard').innerHTML=`
+      <section class="wall-column"><div class="wall-head"><strong>ПРОШУ</strong><span class="wall-count">${wallData.asks.length}</span></div><div class="wall-cards">${wallData.asks.map(x=>exchangeCard(x,'ask')).join('')}</div></section>
+      <section class="wall-column"><div class="wall-head"><strong>ДАЮ</strong><span class="wall-count">${wallData.gives.length}</span></div><div class="wall-cards">${wallData.gives.map(x=>exchangeCard(x,'give')).join('')}</div></section>
+      <section class="wall-column"><div class="wall-head"><strong>СДЕЛАНО</strong><span class="wall-count">${wallData.done.length}</span></div><div class="wall-cards">${wallData.done.map(x=>exchangeCard(x,'done')).join('')}</div></section>`;
+  }
+
+  function renderMatches(){
+    const q=(document.getElementById('matchSearch')?.value||'').toLowerCase();
+    const t=document.getElementById('matchType')?.value||'';
+    const s=document.getElementById('matchStatus')?.value||'';
+    const list=matches.filter(m=>(!q||(m.title+m.requester+m.reason).toLowerCase().includes(q))&&(!t||m.type===t)&&(!s||m.status===s));
+    document.getElementById('matchList').innerHTML=list.map(m=>`<article class="card match-card">
+      <div><div><span class="tag ${m.type==='project'?'amber':''}">${m.type==='project'?'Приглашение в проект':'Запрос ресурса'}</span> <span class="tag ${m.status==='verified'?'green':'gray'}">${m.status==='verified'?'проверен':'нужна верификация'}</span></div>
+      <h3>${m.title}</h3><p>${m.requester}</p><div class="reason"><strong>Почему совпало:</strong> ${m.reason}</div></div>
+      <div class="match-score">${m.score}%<small>совпадение</small></div>
+      <div class="match-actions"><button class="btn btn-soft btn-small" onclick="openMatch('${m.id}')">Посмотреть матч</button>${role==='operator'&&m.status==='new'?`<button class="btn btn-primary btn-small" onclick="verifyMatch('${m.id}')">Подтвердить</button>`:`<button class="btn btn-outline btn-small" onclick="toast('Ответ отправлен автору запроса')">Откликнуться</button>`}</div>
+      </article>`).join('') || '<div class="card" style="padding:34px;text-align:center;color:var(--muted)">Совпадений по выбранным фильтрам нет.</div>';
+    renderQueue();
+  }
+
+  function renderQueue(){
+    const q=matches.filter(m=>m.status==='new');
+    document.getElementById('operatorPanel').hidden=role!=='operator';
+    document.getElementById('operatorQueue').innerHTML=q.map(m=>`<div class="queue-row"><strong>${m.score}% · ${m.title}</strong><small>Проверить релевантную часть профиля</small><div class="queue-actions"><button class="btn btn-primary btn-small" onclick="verifyMatch('${m.id}')">Подтвердить</button><button class="btn btn-soft btn-small" onclick="toast('Матч отправлен на ручную проверку')">Уточнить</button></div></div>`).join('');
+  }
+
+  function verifyMatch(id){
+    const m=matches.find(x=>x.id===id); if(!m)return; m.status='verified'; renderMatches(); toast('Матч подтверждён. Релевантная часть профиля готова к отправке.');
+  }
+
+  function renderProjects(){
+    document.getElementById('projectList').innerHTML=projects.map(p=>`<article class="card project-card">
+      <div class="project-top"><div><span class="tag ${p.progress>85?'green':''}">${p.status}</span><h3>${p.title}</h3><p>${p.desc}</p></div><span class="points">+${p.points} баллов</span></div>
+      <div class="progress"><span style="width:${p.progress}%"></span></div><small style="color:var(--muted)">Прогресс проекта: ${p.progress}%</small>
+      <div class="sprints">${p.sprints.map((s,i)=>`<div class="sprint ${s[1]}"><strong>Спринт ${i+1}</strong>${s[0]}</div>`).join('')}</div>
+      <div class="project-footer"><span class="mini-person"><span class="mini-avatar">4</span><span>4 участника</span></span><button class="btn btn-soft btn-small" onclick="openProject('${p.id}')">Открыть проект</button></div>
+    </article>`).join('');
+  }
+
+  function renderExperts(){
+    const q=(document.getElementById('expertSearch')?.value||'').toLowerCase();
+    const list=experts.filter(e=>!q||(e.name+e.role+e.tags.join(' ')).toLowerCase().includes(q));
+    document.getElementById('expertGrid').innerHTML=list.map(e=>`<article class="card expert-card">
+      <div class="expert-head"><div class="expert-avatar">${e.initials}</div><div><h3>${e.name}</h3><p>${e.role}</p><div class="rating">★★★★★ <span style="color:var(--muted);letter-spacing:0">${e.score}</span></div></div></div>
+      <div class="expert-tags">${e.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      <div class="expert-stats"><div><strong>${e.points}</strong>баллов</div><div><strong>${e.projects}</strong>проектов</div><div><strong>${e.score}</strong>рейтинг</div></div>
+      <div class="privacy">◉ ${e.privacy}</div>
+      <button class="btn btn-soft btn-small" style="margin-top:11px" onclick="toast('Запрос доступа к релевантной части профиля отправлен')">Запросить контакт</button>
+    </article>`).join('');
+  }
+
+  function renderRating(){
+    const sorted=[...experts].sort((a,b)=>b.points-a.points);
+    document.getElementById('rankTable').innerHTML=`<div class="rank-row"><div>Место</div><div>Эксперт</div><div>Баллы</div><div>Проекты</div><div>Рейтинг</div></div>`+
+      sorted.map((e,i)=>`<div class="rank-row"><div class="rank-pos">${i+1}</div><div class="rank-person"><div class="mini-avatar">${e.initials}</div><div><strong>${e.name}</strong><br><small style="color:var(--muted)">${e.role}</small></div></div><div class="rank-points">${e.points}</div><div>${e.projects}</div><div class="rating">★ ${e.score}</div></div>`).join('');
+  }
+
+  function openCreate(kind){ setCreateKind(kind); document.getElementById('createModal').classList.add('open'); }
+  function closeCreate(){ document.getElementById('createModal').classList.remove('open'); }
+  function setCreateKind(kind){
+    createKind=kind;
+    document.querySelectorAll('.radio').forEach(b=>b.classList.toggle('active',b.dataset.kind===kind));
+    document.getElementById('projectExtra').hidden=kind!=='project';
+    const map={ask:['Новый запрос','Опишите, какой ресурс, экспертиза или контакт вам нужен.','Что вам нужно?'],give:['Новое предложение','Опишите, чем вы готовы помочь сообществу.','Что вы предлагаете?'],project:['Приглашение в проект','Расскажите о цели проекта, текущем прогрессе и дефиците команды.','Название проекта']};
+    document.getElementById('createTitle').textContent=map[kind][0]; document.getElementById('createSubtitle').textContent=map[kind][1]; document.getElementById('subjectLabel').textContent=map[kind][2];
+  }
+  function saveCreate(){
+    const title=document.getElementById('createSubject').value.trim(), text=document.getElementById('createText').value.trim();
+    if(!title||!text){toast('Заполните название и описание');return}
+    const area=document.getElementById('createArea').value;
+    if(createKind==='ask') wallData.asks.unshift({id:'a'+Date.now(),title,text,author:'Александр Соколов',initials:'АС',area,match:93});
+    else if(createKind==='give') wallData.gives.unshift({id:'g'+Date.now(),title,text,author:'Александр Соколов',initials:'АС',area,match:91});
+    else {projects.unshift({id:'p'+Date.now(),title,desc:text,progress:5,points:0,status:'Новый',sprints:[['Формирование команды','active'],['Планирование',''],['Пилот',''],['Результат','']]});renderProjects()}
+    renderWall(); closeCreate(); nav(createKind==='project'?'projects':'wall'); toast('Запись опубликована');
+    document.getElementById('createSubject').value='';document.getElementById('createText').value='';document.getElementById('createGap').value='';
+  }
+
+  function openWall(id,kind){
+    const key=kind==='ask'?'asks':kind==='give'?'gives':'done'; const x=wallData[key].find(i=>i.id===id); if(!x)return;
+    document.getElementById('drawerTag').textContent=kind==='ask'?'Запрос':kind==='give'?'Предложение':'Результат';
+    document.getElementById('drawerTitle').textContent=x.title;
+    document.getElementById('drawerBody').innerHTML=`<p style="color:var(--muted)">${x.text}</p>
+      <div class="detail-block"><small>Автор</small><strong>${x.author}</strong></div>
+      <div class="detail-block"><small>Сфера</small><strong>${x.area}</strong></div>
+      ${x.match?`<div class="detail-block"><small>Лучшее совпадение</small><strong>${x.match}% · найдено автоматически</strong></div>`:''}
+      <h3 style="margin-top:22px">Обсуждение</h3>${chatHtml()}
+      <div class="composer"><input id="drawerMsg" placeholder="Сообщение по запросу…"><button onclick="sendDrawer()">→</button></div>`;
+    document.getElementById('drawerBg').classList.add('open');
+  }
+
+  function openMatch(id){
+    const m=matches.find(x=>x.id===id); if(!m)return;
+    document.getElementById('drawerTag').textContent='Матч '+m.score+'%'; document.getElementById('drawerTitle').textContent=m.title;
+    document.getElementById('drawerBody').innerHTML=`<p style="color:var(--muted)">${m.requester}</p>
+      <div class="detail-block"><small>Эксперт</small><strong>${m.expert}</strong></div>
+      <div class="detail-block"><small>Почему совпало</small><strong>${m.reason}</strong></div>
+      <div class="detail-block"><small>Что видно автору запроса</small><strong>${m.privacy}</strong></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:13px">${m.status==='new'&&role==='operator'?`<button class="btn btn-primary btn-small" onclick="verifyMatch('${m.id}');closeDrawer()">Подтвердить матч</button>`:''}<button class="btn btn-soft btn-small" onclick="toast('Запрос на контакт отправлен')">Связаться</button></div>
+      <h3 style="margin-top:22px">Диалог по матчу</h3>${chatHtml()}<div class="composer"><input id="drawerMsg" placeholder="Напишите сообщение…"><button onclick="sendDrawer()">→</button></div>`;
+    document.getElementById('drawerBg').classList.add('open');
+  }
+
+  function openProject(id){
+    const p=projects.find(x=>x.id===id); if(!p)return;
+    document.getElementById('drawerTag').textContent='Проект'; document.getElementById('drawerTitle').textContent=p.title;
+    document.getElementById('drawerBody').innerHTML=`<p style="color:var(--muted)">${p.desc}</p>
+      <div class="detail-block"><small>Прогресс</small><strong>${p.progress}% · ${p.status}</strong></div>
+      <div class="detail-block"><small>Баллы участникам</small><strong>${p.points} баллов после подтверждения результата</strong></div>
+      <h3 style="margin-top:22px">Спринты</h3><div class="sprints">${p.sprints.map((s,i)=>`<div class="sprint ${s[1]}"><strong>Спринт ${i+1}</strong>${s[0]}</div>`).join('')}</div>
+      <h3 style="margin-top:22px">Командный чат</h3>${chatHtml()}<div class="composer"><input id="drawerMsg" placeholder="Сообщение команде…"><button onclick="sendDrawer()">→</button></div>
+      <button class="btn btn-primary btn-small" style="margin-top:14px" onclick="toast('Результат спринта отправлен на подтверждение')">Зафиксировать результат спринта</button>`;
+    document.getElementById('drawerBg').classList.add('open');
+  }
+
+  function chatHtml(){return `<div class="chat-thread" id="drawerThread">
+    <div class="msg"><div class="mini-avatar">МО</div><div class="msg-body"><small>Мария · 10:12</small><div class="msg-text">Добавила контекст и материалы. Нужен взгляд на риски внедрения.</div></div></div>
+    <div class="msg me"><div class="mini-avatar">АС</div><div class="msg-body"><small>Вы · 10:26</small><div class="msg-text">Посмотрю сегодня. Сначала уточню два параметра модели.</div></div></div>
+  </div>`}
+  function sendDrawer(){
+    const input=document.getElementById('drawerMsg'), thread=document.getElementById('drawerThread'); if(!input||!thread||!input.value.trim())return;
+    thread.insertAdjacentHTML('beforeend',`<div class="msg me"><div class="mini-avatar">АС</div><div class="msg-body"><small>Вы · сейчас</small><div class="msg-text">${escapeHtml(input.value.trim())}</div></div></div>`);
+    input.value='';thread.scrollTop=thread.scrollHeight;
+  }
+  function closeDrawer(){document.getElementById('drawerBg').classList.remove('open')}
+
+  function toggleSwitch(btn){btn.classList.toggle('on');toast(btn.classList.contains('on')?'Канал включён':'Канал выключен')}
+  function toggleBot(){document.getElementById('bot').classList.toggle('open')}
+  document.getElementById('botFab').addEventListener('click',toggleBot);
+  function botQuick(text){
+    addBot(text,true);
+    const replies={
+      'Мне нужен эксперт':'Опишите, кого ищете: область экспертизы, регион и что должно получиться. Я оформлю запрос и покажу совпадения.',
+      'Могу помочь':'Отлично. Напишите, какую экспертизу, ресурс или контакты вы готовы предложить — это появится в разделе «Даю».',
+      'Приглашаю в проект':'Укажите цель проекта, что уже сделано и кого или чего сейчас не хватает. После публикации система предложит релевантных Экспертов.',
+      'Покажи мои матчи':'У вас 8 новых совпадений. Самое сильное — 96%: запрос на финансовую модель инфраструктурного проекта.'
+    };
+    setTimeout(()=>addBot(replies[text]||'Готово.',false),250)
+  }
+  function sendBot(e){
+    e.preventDefault();const input=document.getElementById('botInput');const val=input.value.trim();if(!val)return;addBot(val,true);input.value='';
+    setTimeout(()=>addBot('Понял. Я выделил тему запроса и могу оформить карточку для сопоставления. Откройте «Мне нужно» или «Могу помочь», чтобы уточнить детали.',false),300)
+  }
+  function addBot(text,me){
+    const thread=document.getElementById('botThread');thread.insertAdjacentHTML('beforeend',`<div class="bubble ${me?'me':''}">${escapeHtml(text)}</div>`);thread.scrollTop=thread.scrollHeight;
+  }
+
+  function toast(text){const t=document.getElementById('toast');t.textContent=text;t.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove('show'),2400)}
+  function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+
+  function applySharedRole(sharedRole, announce){
+    role = sharedRole === 'curator' ? 'operator' : 'expert';
+    renderStats();renderMatches();renderMentorship();
+    if (announce) toast(role==='operator' ? 'Режим Куратора: доступна очередь верификации' : 'Показаны ваши запросы, матчи и наставничество');
+  }
+  document.addEventListener('rsv:role-change', e => applySharedRole(e.detail.role, e.detail.announce));
+
+  renderStats();renderWall();renderMatches();renderProjects();renderExperts();renderRating();renderMentorship();
+  RSVNav.initTopbar('stena-obmena');
+  applySharedRole(RSVNav.getRole(), false);
+</script>
+</body>
+</html>

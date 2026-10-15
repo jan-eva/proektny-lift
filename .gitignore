@@ -1,0 +1,10 @@
+.venv/
+config.py
+export_chat.py
+*.docx
+~$*.docx
+session.session
+media/
+*.json
+*.csv
+.DS_Store
