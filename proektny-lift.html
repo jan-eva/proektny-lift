@@ -1167,7 +1167,11 @@
           <div id="recommendationsBlock" hidden style="margin-top:12px;padding:12px;border-radius:12px;background:rgba(37,131,91,.08)">
             <strong style="display:block;margin-bottom:6px;color:var(--green);font-size:12px;text-transform:uppercase;letter-spacing:.06em">Рекомендации по итогам анкеты</strong>
             <ul id="recommendationsList" style="margin:0;padding-left:18px;font-size:12px;color:var(--ink);display:grid;gap:4px"></ul>
-            <button class="link-btn" id="emailRecommendations" style="margin-top:6px;padding:0">Открыть письмо с рекомендациями →</button>
+            <div style="display:flex;gap:14px;margin-top:6px">
+              <button class="link-btn" id="emailRecommendations" style="padding:0">Отправить на почту →</button>
+              <button class="link-btn" id="toggleFullSurvey" style="padding:0">Показать заполненную анкету ↓</button>
+            </div>
+            <div id="fullSurveyView" hidden style="margin-top:10px;padding:12px;border-radius:10px;background:#fff;border:1px solid rgba(0,0,0,.06);font-size:12px;color:var(--ink);white-space:pre-wrap;line-height:1.5;max-height:360px;overflow-y:auto"></div>
           </div>
           <button class="btn btn-blue btn-small" style="width:100%;margin-top:14px" id="openSurveyBtn" data-demo="audit">Пройти аудит потенциала</button>
         </aside>
@@ -2166,22 +2170,43 @@
       return list;
     }
 
-    function openMailDraft(d, recs) {
+    const SCORE_LABEL = { novelty: 'Отношение к новому', purpose: 'Ясность цели', connection: 'Взаимодействие с людьми', challenge: 'Работа со сложными задачами' };
+    function formatFullSurvey(d, scores, recs) {
+      const L = [];
+      const add = (label, val) => { if (val && (!Array.isArray(val) || val.length)) L.push(`${label}: ${Array.isArray(val) ? val.join('; ') : val}`); };
+      L.push('РЕЗУЛЬТАТЫ АУДИТА ПОТЕНЦИАЛА — ПРОЕКТНЫЙ ЛИФТ');
+      L.push('');
+      L.push('Контакты');
+      add('Email', d.email); add('Возраст', d.age); add('Пол', d.gender);
+      L.push('');
+      L.push('О статусе');
+      add('Социально-экономический статус', d.economicStatus); add('Регалии / звания', d.regalia);
+      add('Опыт работы', d.experience); add('Должность', d.position); add('Место работы', d.workplace);
+      add('Волонтёрство', d.volunteer); add('Комментарий про волонтёрство', d.volunteerComment);
+      L.push('');
+      L.push('О текущей деятельности');
+      add('Роли', d.roles); add('Другая роль', d.roleOther);
+      add('Главный результат за последний год', d.achievement); add('Главный барьер', d.barrier);
+      add('Нерешённые задачи', d.problems);
+      add('Карьерный трек', d.sector); add('Почему этот трек', d.whySector);
+      add('Предпочитаемый формат лифта', d.liftFormat); add('За что обычно хвалят', d.praised);
+      add('Дефициты компетенций', d.gaps); add('Другой дефицит', d.gapsOther);
+      add('Недооценённые качества', d.undervalued); add('Предпочитаемый тип наставника', d.mentorType);
+      add('Что поможет расти', d.growth); add('Предпочитаемые форматы поддержки', d.formats); add('Другой формат', d.formatsOther);
+      L.push('');
+      L.push('Трудовые ценности');
+      (d.values || []).forEach((v, i) => { if (v) L.push(`${i + 1}. ${v}`); });
+      L.push('');
+      L.push('Результаты по блокам (% согласия с оригинальными утверждениями анкеты)');
+      Object.keys(SCORE_LABEL).forEach(k => { if (scores[k] !== undefined) L.push(`${SCORE_LABEL[k]}: ${scores[k]}%`); });
+      L.push('');
+      L.push('Рекомендации');
+      recs.forEach(r => L.push('— ' + r));
+      return L.join('\n');
+    }
+    function openMailDraft(d, fullText) {
       const subject = 'Результаты аудита потенциала — Проектный лифт';
-      const lines = [
-        'Результаты аудита потенциала и дефицитов',
-        '',
-        'Рекомендации:',
-        ...recs.map(r => '— ' + r),
-        '',
-        'Ответы по текущей деятельности:',
-        d.achievement ? `Главный результат: ${d.achievement}` : '',
-        d.barrier ? `Барьер: ${d.barrier}` : '',
-        d.sector ? `Карьерный трек: ${d.sector}` : '',
-        d.liftFormat ? `Формат лифта: ${d.liftFormat}` : '',
-        d.mentorType ? `Тип наставника: ${d.mentorType}` : ''
-      ].filter(Boolean).join('\n');
-      const mailto = `mailto:${encodeURIComponent(d.email || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines)}`;
+      const mailto = `mailto:${encodeURIComponent(d.email || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fullText)}`;
       window.location.href = mailto;
     }
 
@@ -2205,7 +2230,8 @@
         barrier: val('surveyBarrier'), problems: [val('surveyProblem1'), val('surveyProblem2'), val('surveyProblem3')].filter(Boolean),
         sector: val('surveySector'), whySector: val('surveyWhySector'), liftFormat: val('surveyLiftFormat'),
         praised: val('surveyPraised'), gaps, gapsOther: val('surveyGapsOther'), undervalued: val('surveyUndervalued'),
-        mentorType: val('surveyMentorType'), growth: val('surveyGrowth'), formats, formatsOther: val('surveyFormatsOther')
+        mentorType: val('surveyMentorType'), growth: val('surveyGrowth'), formats, formatsOther: val('surveyFormatsOther'),
+        values: [1, 2, 3].map(i => checked('values_' + i))
       };
 
       if (data.barrier) {
@@ -2214,10 +2240,13 @@
       document.getElementById('auditUpdatedTag').textContent = 'Аудит обновлён только что';
 
       const scoreMap = { purpose: 'scorePurpose', challenge: 'scoreChallenge', connection: 'scoreConnection' };
+      const scores = {};
       deepBlocks.forEach(b => {
         const avg = scoreDeepBlock(b);
-        if (avg === null || !scoreMap[b.id]) return;
+        if (avg === null) return;
         const pct = Math.round((avg - 1) / 4 * 100);
+        scores[b.id] = pct;
+        if (!scoreMap[b.id]) return;
         document.getElementById(scoreMap[b.id] + 'Val').textContent = pct + '%';
         document.getElementById(scoreMap[b.id] + 'Bar').style.width = pct + '%';
       });
@@ -2225,10 +2254,21 @@
       const recs = buildRecommendations(data);
       document.getElementById('recommendationsList').innerHTML = recs.map(r => `<li>${esc(r)}</li>`).join('');
       document.getElementById('recommendationsBlock').hidden = false;
-      document.getElementById('emailRecommendations').onclick = () => openMailDraft(data, recs);
+
+      const fullText = formatFullSurvey(data, scores, recs);
+      const fullView = document.getElementById('fullSurveyView');
+      fullView.textContent = fullText;
+      fullView.hidden = true;
+      const toggleBtn = document.getElementById('toggleFullSurvey');
+      toggleBtn.textContent = 'Показать заполненную анкету ↓';
+      toggleBtn.onclick = () => {
+        fullView.hidden = !fullView.hidden;
+        toggleBtn.textContent = fullView.hidden ? 'Показать заполненную анкету ↓' : 'Скрыть анкету ↑';
+      };
+      document.getElementById('emailRecommendations').onclick = () => openMailDraft(data, fullText);
 
       closeSurvey();
-      toast(data.email ? 'Ответы сохранены — рекомендации доступны в профиле и готовы к отправке на почту' : 'Ответы сохранены — рекомендации доступны в профиле потенциала');
+      toast(data.email ? 'Ответы сохранены — полная анкета доступна в профиле и готова к отправке на почту' : 'Ответы сохранены — полная анкета доступна в профиле потенциала');
     });
 
     renderExpertProfile();
