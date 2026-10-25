@@ -2245,7 +2245,16 @@
     RSVNav.initTopbar('proektny-lift');
     applyRole(currentRole, false);
     const initial = location.hash.replace('#','');
-    if (views.includes(initial)) showView(initial);
+    if (views.includes(initial)) {
+      showView(initial);
+    } else if (initial) {
+      const target = document.getElementById(initial);
+      const parentView = target?.closest('.view');
+      if (parentView) {
+        showView(parentView.id.replace('view-',''));
+        setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+      }
+    }
   </script>
 </body>
 </html>
