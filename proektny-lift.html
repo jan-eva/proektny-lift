@@ -960,7 +960,7 @@
           <option value="customer">Я — Заказчик</option>
           <option value="curator">Я — Куратор</option>
         </select>
-        <div class="site-avatar" title="Алексей Петров">АП</div>
+        <div class="site-avatar" title="Открыть профиль — Алексей Петров" data-view="profile" role="button" tabindex="0" style="cursor:pointer">АП</div>
       </div>
     </div>
   </header>
@@ -968,6 +968,7 @@
     <div class="site-subbar-inner">
       <nav class="main-nav" aria-label="Основная навигация">
         <button class="nav-btn active" data-view="dashboard">Обзор</button>
+        <button class="nav-btn" data-view="profile">Профиль</button>
         <button class="nav-btn" data-view="tasks">Банк задач</button>
         <button class="nav-btn" data-view="projects">Проекты</button>
         <button class="nav-btn" data-view="experts">Эксперты</button>
@@ -1126,13 +1127,14 @@
       </div>
     </section>
 
-    <section class="view" id="view-experts" hidden>
-      <div class="page-title"><div><span class="eyebrow" id="expertsEyebrow" style="color:var(--blue)">профиль эксперта</span><h1 id="expertsTitle">Результаты важнее должностей</h1><p id="expertsSubtitle">Профиль объединяет проверенные проекты, вклад в сообщество, компетенции и доступность.</p></div></div>
+    <section class="view" id="view-profile" hidden>
+      <div class="page-title"><div><span class="eyebrow" style="color:var(--blue)">мой профиль</span><h1>Алексей Петров — профиль эксперта</h1><p>Проверенные проекты, вклад в сообщество, компетенции, доступность и аудит потенциала.</p></div></div>
 
       <nav class="segmented" aria-label="Разделы профиля" style="margin-top:16px;display:inline-flex">
         <button type="button" onclick="document.getElementById('expertProfileAnchor').scrollIntoView({behavior:'smooth',block:'start'})">Профиль</button>
         <button type="button" onclick="document.getElementById('expertExperienceAnchor').scrollIntoView({behavior:'smooth',block:'start'})">Опыт и проекты</button>
         <button type="button" onclick="document.getElementById('expertAuditAnchor').scrollIntoView({behavior:'smooth',block:'start'})">Аудит потенциала</button>
+        <button type="button" onclick="document.getElementById('expertRecommendationsAnchor').scrollIntoView({behavior:'smooth',block:'start'})">Рекомендации</button>
       </nav>
 
       <div class="card profile-hero" id="expertProfileAnchor" style="margin-top:14px;scroll-margin-top:90px">
@@ -1164,20 +1166,29 @@
           <div class="audit-row"><div class="audit-line"><span>Взаимодействие с людьми</span><b id="scoreConnectionVal">89%</b></div><div class="audit-track"><span id="scoreConnectionBar" style="width:89%"></span></div></div>
           <div class="audit-row"><div class="audit-line"><span>Правовые рамки</span><b>61%</b></div><div class="audit-track"><span style="width:61%"></span></div></div>
           <div class="development-note" id="developmentNote"><strong>Зона развития:</strong> нормативное проектирование. Рекомендованы наставник и две задачи с юридическим куратором.</div>
-          <div id="recommendationsBlock" hidden style="margin-top:12px;padding:12px;border-radius:12px;background:rgba(37,131,91,.08)">
-            <strong style="display:block;margin-bottom:6px;color:var(--green);font-size:12px;text-transform:uppercase;letter-spacing:.06em">Рекомендации по итогам анкеты</strong>
-            <ul id="recommendationsList" style="margin:0;padding-left:18px;font-size:12px;color:var(--ink);display:grid;gap:4px"></ul>
-            <div style="display:flex;gap:14px;margin-top:6px">
-              <button class="link-btn" id="emailRecommendations" style="padding:0">Отправить на почту →</button>
-              <button class="link-btn" id="toggleFullSurvey" style="padding:0">Показать заполненную анкету ↓</button>
-            </div>
-            <div id="fullSurveyView" hidden style="margin-top:10px;padding:12px;border-radius:10px;background:#fff;border:1px solid rgba(0,0,0,.06);font-size:12px;color:var(--ink);white-space:pre-wrap;line-height:1.5;max-height:360px;overflow-y:auto"></div>
-          </div>
           <button class="btn btn-blue btn-small" style="width:100%;margin-top:14px" id="openSurveyBtn" data-demo="audit">Пройти аудит потенциала</button>
         </aside>
       </div>
 
-      <div class="section-head"><div><h2>Эксперты, готовые к проекту</h2><p>Фильтрация по компетенциям, подтверждённым результатам и доступности.</p></div><button class="btn btn-soft btn-small" data-demo="expertFilter">Настроить подбор</button></div>
+      <section class="card" id="expertRecommendationsAnchor" style="margin-top:18px;scroll-margin-top:90px">
+        <div class="activity-head"><div><span class="eyebrow" style="color:var(--green)">по результатам аудита</span><h3 style="margin-top:6px">Рекомендации по развитию</h3><p>Персональные рекомендации появляются здесь после прохождения аудита потенциала.</p></div></div>
+        <div id="recommendationsEmpty" style="margin-top:10px;font-size:13px;color:var(--muted)">Вы ещё не проходили аудит потенциала.
+          <button class="btn btn-blue btn-small" style="margin-top:10px" data-demo="audit">Пройти аудит потенциала</button>
+        </div>
+        <div id="recommendationsBlock" hidden style="margin-top:12px;padding:12px;border-radius:12px;background:rgba(37,131,91,.08)">
+          <ul id="recommendationsList" style="margin:0;padding-left:18px;font-size:12px;color:var(--ink);display:grid;gap:4px"></ul>
+          <div style="display:flex;gap:14px;margin-top:6px">
+            <button class="link-btn" id="emailRecommendations" style="padding:0">Отправить на почту →</button>
+            <button class="link-btn" id="toggleFullSurvey" style="padding:0">Показать заполненную анкету ↓</button>
+          </div>
+          <div id="fullSurveyView" hidden style="margin-top:10px;padding:12px;border-radius:10px;background:#fff;border:1px solid rgba(0,0,0,.06);font-size:12px;color:var(--ink);white-space:pre-wrap;line-height:1.5;max-height:360px;overflow-y:auto"></div>
+        </div>
+      </section>
+    </section>
+
+    <section class="view" id="view-experts" hidden>
+      <div class="page-title"><div><span class="eyebrow" id="expertsEyebrow" style="color:var(--blue)">подбор команды</span><h1 id="expertsTitle">Эксперты, готовые к проекту</h1><p id="expertsSubtitle">Сравнивайте подтверждённый опыт, рейтинги, вклад и доступность коллег.</p></div></div>
+      <div class="section-head"><div><h2>Каталог экспертов</h2><p>Фильтрация по компетенциям, подтверждённым результатам и доступности.</p></div><button class="btn btn-soft btn-small" data-demo="expertFilter">Настроить подбор</button></div>
       <div class="directory-grid" id="expertDirectory"></div>
     </section>
 
@@ -1528,7 +1539,7 @@
       {id:'otraslevoy-centr', name:'Отраслевой центр компетенций', type:'Корпорация', sector:'Технологии', bio:'Собирает и тиражирует проверенные сценарии цифровой трансформации для организаций реального сектора.', rating:'4,8', stats:{tasks:8,lifted:10,lifts:4}, taskIds:['PL-0388']}
     ];
 
-    const views = ['dashboard','tasks','projects','experts','customers'];
+    const views = ['dashboard','profile','tasks','projects','experts','customers'];
     let currentRole = 'expert';
     let currentTask = null;
     let toastTimer;
@@ -1753,7 +1764,7 @@
         expert: {
           tasks:['банк задач','Задачи, готовые к работе','Каждая карточка содержит источник, ожидаемый результат, ресурсы, KPI и четыре проверки зрелости.'],
           projects:['рабочее пространство эксперта','Ход моего проекта','Канбан — для ежедневной работы, диаграмма Ганта — для сроков, зависимостей и контрольных точек.'],
-          experts:['профиль эксперта','Результаты важнее должностей','Профиль объединяет проверенные проекты, вклад в сообщество, компетенции и доступность.']
+          experts:['коллеги по программе','Эксперты, готовые к проекту','Сравнивайте подтверждённый опыт, рейтинги, вклад и доступность коллег.']
         },
         customer: {
           tasks:['задачи заказчика','Мои задачи и отклики','Следите за зрелостью постановки, качеством откликов и переходом задачи в проект.'],
@@ -2254,6 +2265,7 @@
       const recs = buildRecommendations(data);
       document.getElementById('recommendationsList').innerHTML = recs.map(r => `<li>${esc(r)}</li>`).join('');
       document.getElementById('recommendationsBlock').hidden = false;
+      document.getElementById('recommendationsEmpty').hidden = true;
 
       const fullText = formatFullSurvey(data, scores, recs);
       const fullView = document.getElementById('fullSurveyView');

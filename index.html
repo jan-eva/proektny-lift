@@ -144,6 +144,23 @@
       .steps-grid, .task-grid, .entity-grid { grid-template-columns: 1fr; }
       .hero h1 { font-size: 34px; }
     }
+    .login-modal-backdrop { position: fixed; inset: 0; background: rgba(30,39,66,.5); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; visibility: hidden; transition: opacity .18s ease; padding: 16px; }
+    .login-modal-backdrop.open { opacity: 1; visibility: visible; }
+    .login-modal { position: relative; width: 100%; max-width: 380px; background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 28px 26px; }
+    .login-modal h2 { margin: 0 0 8px; font-size: 20px; color: var(--ink); }
+    .login-modal-note { margin: 0 0 18px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .login-modal-close { position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; border: none; background: var(--paper); border-radius: 50%; font-size: 16px; color: var(--muted); cursor: pointer; }
+    .login-field { display: block; margin-bottom: 12px; }
+    .login-field span { display: block; font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 5px; }
+    .login-field input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 14px; box-sizing: border-box; }
+    .login-role-row { margin: 14px 0 18px; }
+    .login-role-row > span { display: block; font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+    .login-role-options { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--ink); }
+    .login-role-options label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    #loginStepProgress { text-align: center; padding: 10px 0 4px; }
+    #loginStepProgress p { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
+    .login-spinner { width: 30px; height: 30px; margin: 0 auto; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--blue); animation: login-spin .8s linear infinite; }
+    @keyframes login-spin { to { transform: rotate(360deg); } }
   </style>
 <div class="top-ribbon" aria-hidden="true"></div>
   <header class="site-topbar">
@@ -163,10 +180,35 @@
         <a href="zakazchik.html" data-site-link="zakazchik">Заказчики</a>
       </nav>
       <div class="site-actions">
-        <a class="site-login-btn" href="proektny-lift.html">Войти</a>
+        <button type="button" class="site-login-btn" id="loginBtn">Войти</button>
       </div>
     </div>
   </header>
+
+  <div class="login-modal-backdrop" id="loginModal" aria-hidden="true">
+    <div class="login-modal" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
+      <button type="button" class="login-modal-close" id="loginModalClose" aria-label="Закрыть">×</button>
+      <div id="loginStepForm">
+        <h2 id="loginModalTitle">Вход в Проектный лифт</h2>
+        <p class="login-modal-note">Демонстрационный вход — это прототип, реальные пароли не используются и не сохраняются.</p>
+        <label class="login-field"><span>Email или телефон</span><input type="text" id="loginEmail" placeholder="alexey.petrov@mail.ru"></label>
+        <label class="login-field"><span>Пароль</span><input type="password" id="loginPassword" placeholder="••••••••"></label>
+        <div class="login-role-row">
+          <span>Войти как</span>
+          <div class="login-role-options">
+            <label><input type="radio" name="loginRole" value="expert" checked> Эксперт</label>
+            <label><input type="radio" name="loginRole" value="customer"> Заказчик</label>
+            <label><input type="radio" name="loginRole" value="curator"> Куратор</label>
+          </div>
+        </div>
+        <button type="button" class="btn btn-blue" id="loginSubmit" style="width:100%">Войти</button>
+      </div>
+      <div id="loginStepProgress" hidden>
+        <div class="login-spinner" aria-hidden="true"></div>
+        <p>Выполняется вход…</p>
+      </div>
+    </div>
+  </div>
 
   <main>
     <section class="hero">
@@ -310,6 +352,25 @@
     document.getElementById('postTaskLink').addEventListener('click', () => {
       try { localStorage.setItem('rsvRole', 'customer'); } catch (_) {}
     });
+
+    (function loginSimulator() {
+      const modal = document.getElementById('loginModal');
+      const form = document.getElementById('loginStepForm');
+      const progress = document.getElementById('loginStepProgress');
+      const open = () => { modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); };
+      const close = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); form.hidden = false; progress.hidden = true; };
+      document.getElementById('loginBtn').addEventListener('click', open);
+      document.getElementById('loginModalClose').addEventListener('click', close);
+      modal.addEventListener('click', e => { if (e.target === modal) close(); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.classList.contains('open')) close(); });
+      document.getElementById('loginSubmit').addEventListener('click', () => {
+        const role = document.querySelector('input[name="loginRole"]:checked').value;
+        form.hidden = true;
+        progress.hidden = false;
+        try { localStorage.setItem('rsvRole', role); } catch (_) {}
+        setTimeout(() => { window.location.href = 'proektny-lift.html#' + (role === 'expert' ? 'profile' : 'dashboard'); }, 900);
+      });
+    })();
 
     (function generateHeatPreview() {
       const host = document.getElementById('heroHeat');
