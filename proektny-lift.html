@@ -700,6 +700,7 @@
       position: fixed;
       z-index: 90;
       inset: 0;
+      overflow-y: auto;
       background: rgba(17,26,52,.42);
       backdrop-filter: blur(4px);
       opacity: 0;
@@ -732,11 +733,19 @@
     .question { padding: 15px; border: 1px solid var(--line); border-radius: 14px; }
     .question b { display: block; margin-bottom: 5px; color: var(--deep); font-size: 12px; }
     .question p { margin: 0; font-size: 14px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+    .form-group { display: grid; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label { font-size: 12px; font-weight: 850; }
+    .radio-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+    .radio { display: flex; align-items: center; gap: 8px; padding: 11px; border: 1px solid var(--line); border-radius: 12px; background: #fff; text-align: left; font-size: 13px; cursor: pointer; }
+    .radio input { flex: 0 0 auto; }
+    @media (max-width: 620px) { .form-grid, .radio-grid { grid-template-columns: 1fr; } .form-group.full { grid-column: auto; } }
     .maturity { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; margin-top: 12px; }
     .check { display: flex; align-items: center; gap: 9px; padding: 10px; border-radius: 12px; background: rgba(37,131,91,.08); color: var(--green); font-size: 12px; font-weight: 750; }
     .check::before { content: "✓"; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: var(--green); }
     .customer-box { margin-top: 12px; padding: 15px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-radius: 14px; background: linear-gradient(135deg, rgba(153,197,233,.19), rgba(96,90,166,.06)); }
-    .drawer-footer { position: fixed; right: 0; bottom: 0; z-index: 4; width: min(720px,100%); padding: 15px 26px; display: flex; justify-content: space-between; align-items: center; gap: 14px; border-top: 1px solid var(--line); background: rgba(255,255,255,.97); backdrop-filter: blur(14px); }
+    .drawer-footer { position: sticky; bottom: 0; z-index: 4; width: 100%; padding: 15px 26px; display: flex; justify-content: space-between; align-items: center; gap: 14px; border-top: 1px solid var(--line); background: rgba(255,255,255,.97); backdrop-filter: blur(14px); }
 
     .rating-modal {
       position: fixed;
@@ -1115,6 +1124,16 @@
         <div class="profile-score"><small>Рейтинг эксперта</small><strong>★ 4,91</strong><span>37 проверенных отзывов · 12 проектов</span></div>
       </div>
 
+      <section class="card" style="padding:22px;margin-top:18px">
+        <div class="activity-head">
+          <div><h3>О себе как о специалисте</h3><p>Экспертиза в предметной области и проекты, которые её подтверждают.</p></div>
+          <button class="btn btn-soft btn-small" id="openEditProfile">Редактировать профиль</button>
+        </div>
+        <p id="expertBioText" style="margin:14px 0 0;color:var(--ink);font-size:14px;line-height:1.55"></p>
+        <div class="section-head" style="margin:22px 0 12px"><div><h2 style="font-size:18px">Проекты</h2><p style="font-size:12px">Что сделано, для кого и в каком масштабе.</p></div></div>
+        <div class="portfolio-list" id="expertProjectsList"></div>
+      </section>
+
       <div class="profile-layout">
         <section class="card activity-card">
           <div class="activity-head"><div><h3>Вклад за последние 12 месяцев</h3><p>Результаты, экспертные проверки, наставничество и помощь другим командам.</p></div><span class="tag green">286 вкладов</span></div>
@@ -1122,12 +1141,13 @@
           <div class="heat-legend"><span>меньше</span><span class="legend-cell" style="background:#EDF1F5"></span><span class="legend-cell" style="background:rgba(153,197,233,.72)"></span><span class="legend-cell" style="background:rgba(71,98,182,.58)"></span><span class="legend-cell" style="background:rgba(71,98,182,.88)"></span><span class="legend-cell" style="background:var(--deep)"></span><span>больше</span></div>
           <div class="activity-stats"><div class="activity-stat"><strong>12</strong><span>проектов</span></div><div class="activity-stat"><strong>31</strong><span>результат</span></div><div class="activity-stat"><strong>18</strong><span>экспертиз</span></div><div class="activity-stat"><strong>7</strong><span>наставничеств</span></div></div>
         </section>
-        <aside class="card audit-card"><div class="tag green">Аудит обновлён 5 дней назад</div><h3 style="margin-top:14px">Профиль потенциала</h3><p>Самооценка сопоставлена с проверенными результатами и отзывами.</p>
+        <aside class="card audit-card"><div class="tag green" id="auditUpdatedTag">Аудит обновлён 5 дней назад</div><h3 style="margin-top:14px">Профиль потенциала</h3><p>Самооценка сопоставлена с проверенными результатами и отзывами.</p>
           <div class="audit-row"><div class="audit-line"><span>Стратегическое мышление</span><b>92%</b></div><div class="audit-track"><span style="width:92%"></span></div></div>
           <div class="audit-row"><div class="audit-line"><span>Управление исполнением</span><b>86%</b></div><div class="audit-track"><span style="width:86%"></span></div></div>
           <div class="audit-row"><div class="audit-line"><span>Работа со стейкхолдерами</span><b>89%</b></div><div class="audit-track"><span style="width:89%"></span></div></div>
           <div class="audit-row"><div class="audit-line"><span>Правовые рамки</span><b>61%</b></div><div class="audit-track"><span style="width:61%"></span></div></div>
-          <div class="development-note"><strong>Зона развития:</strong> нормативное проектирование. Рекомендованы наставник и две задачи с юридическим куратором.</div>
+          <div class="development-note" id="developmentNote"><strong>Зона развития:</strong> нормативное проектирование. Рекомендованы наставник и две задачи с юридическим куратором.</div>
+          <button class="btn btn-blue btn-small" style="width:100%;margin-top:14px" id="openSurveyBtn" data-demo="audit">Пройти аудит потенциала</button>
         </aside>
       </div>
 
@@ -1169,6 +1189,93 @@
       <div class="rating-line"><span>Прозрачность хода работ</span><div class="star-picker" data-rating="transparency" aria-label="Прозрачность"></div></div>
       <div class="rating-actions"><button class="btn btn-soft" id="cancelRating">Отмена</button><button class="btn btn-blue" id="submitRating">Отправить отзыв</button></div>
     </div>
+  </div>
+
+  <div class="drawer-backdrop" id="editProfileDrawer" aria-hidden="true">
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="editProfileTitle">
+      <div class="drawer-head"><div><span class="tag gray">Профиль эксперта</span><h2 id="editProfileTitle">Редактировать профиль</h2></div><button class="close-btn" id="closeEditProfile" aria-label="Закрыть">×</button></div>
+      <div class="drawer-body">
+        <h3>О себе как о специалисте</h3>
+        <p class="detail-summary">Коротко опишите предметную область и экспертизу — это видят Заказчики при подборе команды.</p>
+        <textarea class="field" id="bioInput" rows="4" style="width:100%;resize:vertical;margin-top:8px" placeholder="Например: веду проекты цифровой трансформации в промышленности, 8 лет в публичном секторе..."></textarea>
+
+        <h3 style="margin-top:24px">Проекты</h3>
+        <p class="detail-summary">Для каждого проекта укажите, для кого он был реализован и масштаб охвата.</p>
+        <div id="projectFormRows" style="display:grid;gap:12px;margin-top:10px"></div>
+        <button class="btn btn-soft btn-small" id="addProjectRow" style="margin-top:4px">+ Добавить проект</button>
+      </div>
+      <div class="drawer-footer"><button class="btn btn-soft" id="cancelEditProfile">Отмена</button><button class="btn btn-blue" id="saveEditProfile">Сохранить профиль</button></div>
+    </aside>
+  </div>
+
+  <div class="drawer-backdrop" id="surveyDrawer" aria-hidden="true">
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="surveyTitle">
+      <div class="drawer-head"><div><span class="tag gray">~25–30 минут</span><h2 id="surveyTitle">Аудит потенциала и дефицитов</h2></div><button class="close-btn" id="closeSurvey" aria-label="Закрыть">×</button></div>
+      <div class="drawer-body">
+        <p class="detail-summary">Форма сопоставляет самооценку с реальными результатами и помогает платформе точнее рекомендовать задачи, наставников и зоны роста.</p>
+
+        <h3>О вас и текущей роли</h3>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Ваша ключевая роль в общественных проектах сегодня (не более 3)</label>
+            <div class="radio-grid" id="surveyRoles" style="grid-template-columns:repeat(2,1fr)">
+              <label class="radio"><input type="checkbox" value="Лидер / руководитель проекта"> Лидер / руководитель проекта</label>
+              <label class="radio"><input type="checkbox" value="Операционный менеджер"> Операционный менеджер / координатор</label>
+              <label class="radio"><input type="checkbox" value="Генератор идей"> Генератор идей / креатор</label>
+              <label class="radio"><input type="checkbox" value="Эксперт-аналитик"> Эксперт-аналитик / технолог</label>
+              <label class="radio"><input type="checkbox" value="Коммуникатор"> Коммуникатор / PR / фандрайзинг</label>
+              <label class="radio"><input type="checkbox" value="Партнёрства и закупки"> Работа с партнёрами и закупки</label>
+            </div>
+          </div>
+          <div class="form-group full">
+            <label>Главный результат последних 12 месяцев, которым вы гордитесь</label>
+            <textarea class="field" id="surveyAchievement" rows="2" placeholder="Что было сделано, какой измеримый эффект получен"></textarea>
+          </div>
+          <div class="form-group full">
+            <label>С каким главным барьером вы сейчас сталкиваетесь?</label>
+            <select class="field" id="surveyBarrier">
+              <option value="">Выберите вариант</option>
+              <option>Нехватка практических компетенций под реальные задачи</option>
+              <option>«Синдром самозванца» при выходе на серьёзные задачи</option>
+              <option>Дефицит ресурсов (команда, бюджет, площадки)</option>
+              <option>Выгорание от перегрузки</option>
+              <option>Непонимание, куда применить свои навыки</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Формат идеального социального лифта</label>
+            <select class="field" id="surveyLiftFormat">
+              <option value="">Выберите вариант</option>
+              <option>Скоростной вертикальный лифт</option>
+              <option>Социальный эскалатор</option>
+              <option>Проектный трамплин</option>
+              <option>Дверь в сообщество</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Какой наставник нужен на текущем этапе</label>
+            <select class="field" id="surveyMentorType">
+              <option value="">Выберите вариант</option>
+              <option>Ментор-эксперт</option>
+              <option>Старший товарищ / фасилитатор</option>
+              <option>Спонсор возможностей</option>
+              <option>Трекер эффективности</option>
+            </select>
+          </div>
+        </div>
+
+        <h3 style="margin-top:26px">Углублённые блоки методики</h3>
+        <p class="detail-summary">Валидированные психометрические шкалы — установки, предпочтения в деятельности, смысложизненные ориентации, мотивы изменений, надпрофессиональные мотивы. Полный текст пунктов не публикуется на открытой странице; блоки проходятся в закрытом кабинете эксперта.</p>
+        <div class="question-list" style="margin-top:10px">
+          <article class="question"><b>Блок «Установки» · 40 пар утверждений · ~10 мин</b><p>Жизненные установки и склонность к риску и новизне.</p></article>
+          <article class="question"><b>Блок «Предпочтения в деятельности» · 32 пункта · ~8 мин</b><p>Парные утверждения о стиле работы и принятия решений.</p></article>
+          <article class="question"><b>Блок «Смысложизненные ориентации» · 20 пунктов · ~6 мин</b><p>Целеустремлённость, осмысленность и локус контроля.</p></article>
+          <article class="question"><b>Блок «Мотивы изменений» · 2×30 пунктов · ~12 мин</b><p>Мотивация аффилиации и достижения, уверенность в коммуникации.</p></article>
+          <article class="question"><b>Блок «Надпрофессиональные мотивы» · 23 вопроса · ~10 мин</b><p>Типология трудовой мотивации (методика Герчикова).</p></article>
+        </div>
+      </div>
+      <div class="drawer-footer"><button class="btn btn-soft" id="cancelSurvey">Позже</button><button class="btn btn-blue" id="submitSurvey">Сохранить ответы</button></div>
+    </aside>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -1728,7 +1835,10 @@
       const open = e.target.closest('[data-open-task]');
       if (open) openTask(open.dataset.openTask);
       const demo = e.target.closest('[data-demo]');
-      if (demo) toast('Демонстрационное действие: функция предусмотрена в продакшен-версии');
+      if (demo) {
+        if (demo.dataset.demo === 'audit') { openSurvey(); }
+        else toast('Демонстрационное действие: функция предусмотрена в продакшен-версии');
+      }
     });
 
     ['taskSearch','sectorFilter','regionFilter','statusFilter'].forEach(id => document.getElementById(id)?.addEventListener(id==='taskSearch'?'input':'change',applyTaskFilters));
@@ -1767,6 +1877,94 @@
       if(!complete){toast('Поставьте оценки по всем трём критериям');return;}
       ratingModal.classList.remove('open');ratingModal.setAttribute('aria-hidden','true');toast('Спасибо. Отзыв сохранён до взаимной публикации.');
     });
+
+    let expertProfile = {
+      bio: 'Веду проекты цифровой трансформации и промышленной политики на стыке государства и бизнеса. 8 лет в публичном секторе, фокус — межведомственные инициативы с измеримым эффектом.',
+      projects: [
+        { title: 'Цифровой маршрут промышленной кооперации', forWhom: 'Министерство промышленности региона', scale: '5 предприятий, 1 регион' },
+        { title: 'Карта заинтересованных сторон пилота', forWhom: 'Комитет промышленной политики', scale: 'Региональный уровень' }
+      ]
+    };
+
+    function renderExpertProfile() {
+      document.getElementById('expertBioText').textContent = expertProfile.bio;
+      document.getElementById('expertProjectsList').innerHTML = expertProfile.projects.length
+        ? expertProfile.projects.map(p => `<div class="portfolio-row"><span>${esc(p.title)} — <span style="color:var(--muted)">${esc(p.forWhom)}</span></span><strong>${esc(p.scale)}</strong></div>`).join('')
+        : '<p style="color:var(--muted);font-size:13px">Проекты пока не добавлены — заполните через «Редактировать профиль».</p>';
+    }
+
+    function renderProjectFormRows() {
+      const host = document.getElementById('projectFormRows');
+      host.innerHTML = expertProfile.projects.map((p, i) => `
+        <div class="card" style="padding:12px" data-row="${i}">
+          <div class="form-grid">
+            <div class="form-group full"><label>Название проекта</label><input class="field" data-field="title" value="${esc(p.title)}"></div>
+            <div class="form-group"><label>Для кого реализован</label><input class="field" data-field="forWhom" value="${esc(p.forWhom)}"></div>
+            <div class="form-group"><label>Масштаб охвата</label><input class="field" data-field="scale" value="${esc(p.scale)}"></div>
+          </div>
+          <button class="link-btn" data-remove-row="${i}" style="color:var(--red)">Удалить проект</button>
+        </div>`).join('');
+    }
+
+    function openEditProfile() {
+      document.getElementById('bioInput').value = expertProfile.bio;
+      renderProjectFormRows();
+      const d = document.getElementById('editProfileDrawer');
+      d.classList.add('open'); d.setAttribute('aria-hidden', 'false');
+    }
+    function closeEditProfile() {
+      const d = document.getElementById('editProfileDrawer');
+      d.classList.remove('open'); d.setAttribute('aria-hidden', 'true');
+    }
+    document.getElementById('openEditProfile').addEventListener('click', openEditProfile);
+    document.getElementById('cancelEditProfile').addEventListener('click', closeEditProfile);
+    document.getElementById('closeEditProfile').addEventListener('click', closeEditProfile);
+    document.getElementById('editProfileDrawer').addEventListener('click', e => { if (e.target === e.currentTarget) closeEditProfile(); });
+
+    document.getElementById('addProjectRow').addEventListener('click', () => {
+      expertProfile.projects.push({ title: '', forWhom: '', scale: '' });
+      renderProjectFormRows();
+    });
+    document.getElementById('projectFormRows').addEventListener('click', e => {
+      const rm = e.target.closest('[data-remove-row]');
+      if (rm) { expertProfile.projects.splice(Number(rm.dataset.removeRow), 1); renderProjectFormRows(); }
+    });
+    document.getElementById('saveEditProfile').addEventListener('click', () => {
+      expertProfile.bio = document.getElementById('bioInput').value.trim();
+      document.querySelectorAll('#projectFormRows [data-row]').forEach(row => {
+        const i = Number(row.dataset.row);
+        row.querySelectorAll('[data-field]').forEach(inp => { expertProfile.projects[i][inp.dataset.field] = inp.value.trim(); });
+      });
+      expertProfile.projects = expertProfile.projects.filter(p => p.title);
+      renderExpertProfile();
+      closeEditProfile();
+      toast('Профиль обновлён');
+    });
+
+    function openSurvey() {
+      const d = document.getElementById('surveyDrawer');
+      d.classList.add('open'); d.setAttribute('aria-hidden', 'false');
+    }
+    function closeSurvey() {
+      const d = document.getElementById('surveyDrawer');
+      d.classList.remove('open'); d.setAttribute('aria-hidden', 'true');
+    }
+    document.getElementById('closeSurvey').addEventListener('click', closeSurvey);
+    document.getElementById('cancelSurvey').addEventListener('click', closeSurvey);
+    document.getElementById('surveyDrawer').addEventListener('click', e => { if (e.target === e.currentTarget) closeSurvey(); });
+    document.getElementById('submitSurvey').addEventListener('click', () => {
+      const roles = [...document.querySelectorAll('#surveyRoles input:checked')].map(i => i.value);
+      if (roles.length > 3) { toast('Выберите не более трёх ролей'); return; }
+      const barrier = document.getElementById('surveyBarrier').value;
+      if (barrier) {
+        document.getElementById('developmentNote').innerHTML = `<strong>Зона развития:</strong> ${esc(barrier)}. Отмечено в аудите потенциала.`;
+      }
+      document.getElementById('auditUpdatedTag').textContent = 'Аудит обновлён только что';
+      closeSurvey();
+      toast('Ответы сохранены — профиль потенциала обновится после обработки');
+    });
+
+    renderExpertProfile();
 
     document.addEventListener('rsv:role-change', e => applyRole(e.detail.role, e.detail.announce));
     currentRole = RSVNav.getRole();
