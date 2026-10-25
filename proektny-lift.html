@@ -729,6 +729,16 @@
     .detail-box { padding: 14px; border-radius: 14px; background: #F5F7FA; }
     .detail-box small { display: block; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; font-size: 10px; }
     .detail-box strong { display: block; margin-top: 5px; }
+    .likert-block { margin-top: 18px; }
+    .likert-block h4 { margin: 0 0 4px; font-size: 15px; }
+    .likert-block > p { margin: 0 0 12px; color: var(--muted); font-size: 12px; }
+    .likert-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px; padding: 10px 0; border-top: 1px solid var(--line); }
+    .likert-row:first-of-type { border-top: 0; }
+    .likert-row span { font-size: 13px; }
+    .likert-scale { display: flex; align-items: center; gap: 6px; }
+    .likert-scale small { color: var(--muted); font-size: 10px; }
+    .likert-scale label { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--muted); cursor: pointer; }
+    .mc-group { display: grid; gap: 8px; margin-top: 6px; }
     .question-list { display: grid; gap: 10px; }
     .question { padding: 15px; border: 1px solid var(--line); border-radius: 14px; }
     .question b { display: block; margin-bottom: 5px; color: var(--deep); font-size: 12px; }
@@ -1118,15 +1128,22 @@
 
     <section class="view" id="view-experts" hidden>
       <div class="page-title"><div><span class="eyebrow" id="expertsEyebrow" style="color:var(--blue)">профиль эксперта</span><h1 id="expertsTitle">Результаты важнее должностей</h1><p id="expertsSubtitle">Профиль объединяет проверенные проекты, вклад в сообщество, компетенции и доступность.</p></div></div>
-      <div class="card profile-hero">
+
+      <nav class="segmented" aria-label="Разделы профиля" style="margin-top:16px;display:inline-flex">
+        <button type="button" onclick="document.getElementById('expertProfileAnchor').scrollIntoView({behavior:'smooth',block:'start'})">Профиль</button>
+        <button type="button" onclick="document.getElementById('expertExperienceAnchor').scrollIntoView({behavior:'smooth',block:'start'})">Опыт и проекты</button>
+        <button type="button" onclick="document.getElementById('expertAuditAnchor').scrollIntoView({behavior:'smooth',block:'start'})">Аудит потенциала</button>
+      </nav>
+
+      <div class="card profile-hero" id="expertProfileAnchor" style="margin-top:14px;scroll-margin-top:90px">
         <div class="profile-avatar">АП</div>
         <div class="profile-copy"><div class="tag-row"><span class="tag green">Профиль подтверждён</span><span class="tag gray">Санкт-Петербург</span></div><h2>Алексей Петров</h2><p>Стратегические проекты · промышленная политика · цифровая трансформация</p><div class="skill-row"><span class="tag">Управление проектами</span><span class="tag">Аналитика</span><span class="tag">Публичный сектор</span><span class="tag">Фасилитация</span></div></div>
         <div class="profile-score"><small>Рейтинг эксперта</small><strong>★ 4,91</strong><span>37 проверенных отзывов · 12 проектов</span></div>
       </div>
 
-      <section class="card" style="padding:22px;margin-top:18px">
+      <section class="card" id="expertExperienceAnchor" style="padding:22px;margin-top:18px;scroll-margin-top:90px">
         <div class="activity-head">
-          <div><h3>О себе как о специалисте</h3><p>Экспертиза в предметной области и проекты, которые её подтверждают.</p></div>
+          <div><span class="eyebrow" style="color:var(--deep)">видно заказчику</span><h3 style="margin-top:6px">Практический опыт и проекты</h3><p>Экспертиза в предметной области и проекты, которые её подтверждают.</p></div>
           <button class="btn btn-soft btn-small" id="openEditProfile">Редактировать профиль</button>
         </div>
         <p id="expertBioText" style="margin:14px 0 0;color:var(--ink);font-size:14px;line-height:1.55"></p>
@@ -1141,12 +1158,17 @@
           <div class="heat-legend"><span>меньше</span><span class="legend-cell" style="background:#EDF1F5"></span><span class="legend-cell" style="background:rgba(153,197,233,.72)"></span><span class="legend-cell" style="background:rgba(71,98,182,.58)"></span><span class="legend-cell" style="background:rgba(71,98,182,.88)"></span><span class="legend-cell" style="background:var(--deep)"></span><span>больше</span></div>
           <div class="activity-stats"><div class="activity-stat"><strong>12</strong><span>проектов</span></div><div class="activity-stat"><strong>31</strong><span>результат</span></div><div class="activity-stat"><strong>18</strong><span>экспертиз</span></div><div class="activity-stat"><strong>7</strong><span>наставничеств</span></div></div>
         </section>
-        <aside class="card audit-card"><div class="tag green" id="auditUpdatedTag">Аудит обновлён 5 дней назад</div><h3 style="margin-top:14px">Профиль потенциала</h3><p>Самооценка сопоставлена с проверенными результатами и отзывами.</p>
-          <div class="audit-row"><div class="audit-line"><span>Стратегическое мышление</span><b>92%</b></div><div class="audit-track"><span style="width:92%"></span></div></div>
-          <div class="audit-row"><div class="audit-line"><span>Управление исполнением</span><b>86%</b></div><div class="audit-track"><span style="width:86%"></span></div></div>
-          <div class="audit-row"><div class="audit-line"><span>Работа со стейкхолдерами</span><b>89%</b></div><div class="audit-track"><span style="width:89%"></span></div></div>
+        <aside class="card audit-card" id="expertAuditAnchor" style="scroll-margin-top:90px"><div class="tag green" id="auditUpdatedTag">Аудит обновлён 5 дней назад</div><h3 style="margin-top:14px">Аудит потенциала <small style="display:block;color:var(--muted);font-weight:600;font-size:11px;text-transform:none;letter-spacing:0">анкета для дальнейшего развития</small></h3><p>Самооценка сопоставлена с проверенными результатами и отзывами.</p>
+          <div class="audit-row"><div class="audit-line"><span>Ясность цели</span><b id="scorePurposeVal">92%</b></div><div class="audit-track"><span id="scorePurposeBar" style="width:92%"></span></div></div>
+          <div class="audit-row"><div class="audit-line"><span>Работа со сложными задачами</span><b id="scoreChallengeVal">86%</b></div><div class="audit-track"><span id="scoreChallengeBar" style="width:86%"></span></div></div>
+          <div class="audit-row"><div class="audit-line"><span>Взаимодействие с людьми</span><b id="scoreConnectionVal">89%</b></div><div class="audit-track"><span id="scoreConnectionBar" style="width:89%"></span></div></div>
           <div class="audit-row"><div class="audit-line"><span>Правовые рамки</span><b>61%</b></div><div class="audit-track"><span style="width:61%"></span></div></div>
           <div class="development-note" id="developmentNote"><strong>Зона развития:</strong> нормативное проектирование. Рекомендованы наставник и две задачи с юридическим куратором.</div>
+          <div id="recommendationsBlock" hidden style="margin-top:12px;padding:12px;border-radius:12px;background:rgba(37,131,91,.08)">
+            <strong style="display:block;margin-bottom:6px;color:var(--green);font-size:12px;text-transform:uppercase;letter-spacing:.06em">Рекомендации по итогам анкеты</strong>
+            <ul id="recommendationsList" style="margin:0;padding-left:18px;font-size:12px;color:var(--ink);display:grid;gap:4px"></ul>
+            <button class="link-btn" id="emailRecommendations" style="margin-top:6px;padding:0">Открыть письмо с рекомендациями →</button>
+          </div>
           <button class="btn btn-blue btn-small" style="width:100%;margin-top:14px" id="openSurveyBtn" data-demo="audit">Пройти аудит потенциала</button>
         </aside>
       </div>
@@ -1212,67 +1234,152 @@
     <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="surveyTitle">
       <div class="drawer-head"><div><span class="tag gray">~25–30 минут</span><h2 id="surveyTitle">Аудит потенциала и дефицитов</h2></div><button class="close-btn" id="closeSurvey" aria-label="Закрыть">×</button></div>
       <div class="drawer-body">
-        <p class="detail-summary">Форма сопоставляет самооценку с реальными результатами и помогает платформе точнее рекомендовать задачи, наставников и зоны роста.</p>
+        <p class="detail-summary">Форма сопоставляет самооценку с реальными результатами и помогает платформе точнее рекомендовать задачи, наставников и зоны роста. Результаты можно получить на почту и увидеть в профиле.</p>
 
-        <h3>О вас и текущей роли</h3>
+        <h3>Контакты</h3>
         <div class="form-grid">
+          <div class="form-group"><label>Электронная почта для отправки результатов</label><input class="field" type="email" id="surveyEmail" placeholder="you@example.com"></div>
+          <div class="form-group"><label>Возраст</label><input class="field" type="number" id="surveyAge" min="16" max="100"></div>
           <div class="form-group full">
-            <label>Ваша ключевая роль в общественных проектах сегодня (не более 3)</label>
-            <div class="radio-grid" id="surveyRoles" style="grid-template-columns:repeat(2,1fr)">
-              <label class="radio"><input type="checkbox" value="Лидер / руководитель проекта"> Лидер / руководитель проекта</label>
-              <label class="radio"><input type="checkbox" value="Операционный менеджер"> Операционный менеджер / координатор</label>
-              <label class="radio"><input type="checkbox" value="Генератор идей"> Генератор идей / креатор</label>
-              <label class="radio"><input type="checkbox" value="Эксперт-аналитик"> Эксперт-аналитик / технолог</label>
-              <label class="radio"><input type="checkbox" value="Коммуникатор"> Коммуникатор / PR / фандрайзинг</label>
-              <label class="radio"><input type="checkbox" value="Партнёрства и закупки"> Работа с партнёрами и закупки</label>
+            <label>Пол</label>
+            <div class="radio-grid" style="grid-template-columns:repeat(2,1fr)" id="surveyGender">
+              <label class="radio"><input type="radio" name="gender" value="Мужчина"> Мужчина</label>
+              <label class="radio"><input type="radio" name="gender" value="Женщина"> Женщина</label>
             </div>
           </div>
+        </div>
+
+        <h3 style="margin-top:26px">О вашем статусе</h3>
+        <div class="form-grid">
           <div class="form-group full">
-            <label>Главный результат последних 12 месяцев, которым вы гордитесь</label>
-            <textarea class="field" id="surveyAchievement" rows="2" placeholder="Что было сделано, какой измеримый эффект получен"></textarea>
+            <label>Как можно охарактеризовать ваш экономический статус?</label>
+            <select class="field" id="surveyEconomicStatus">
+              <option value="">Выберите вариант</option>
+              <option>Обучающийся / студент / магистрант / аспирант</option>
+              <option>Временно не работаю / на иждивении / нетрудоспособен(-на)</option>
+              <option>Учёный</option>
+              <option>Специалист / эксперт</option>
+              <option>Линейный руководитель</option>
+              <option>Руководитель высшего и среднего звена</option>
+              <option>Предприниматель / учредитель организации</option>
+            </select>
+          </div>
+          <div class="form-group full"><label>Комментарий к статусу, регалии и достижения</label><textarea class="field" id="surveyRegalia" rows="2"></textarea></div>
+          <div class="form-group"><label>Общий стаж трудовой деятельности (лет)</label><input class="field" type="number" id="surveyExperience" min="0" max="80"></div>
+          <div class="form-group"><label>Текущая / последняя должность</label><input class="field" id="surveyPosition"></div>
+          <div class="form-group full"><label>Текущее / последнее место работы</label><input class="field" id="surveyWorkplace"></div>
+          <div class="form-group full">
+            <label>Готовы ли на общественных началах участвовать в проработке важных для страны / региона / района / отрасли инициатив?</label>
+            <div class="radio-grid" style="grid-template-columns:repeat(2,1fr)" id="surveyVolunteer">
+              <label class="radio"><input type="radio" name="volunteer" value="Да"> Да</label>
+              <label class="radio"><input type="radio" name="volunteer" value="Нет"> Нет</label>
+            </div>
+          </div>
+          <div class="form-group full"><label>Комментарий к предыдущему ответу</label><textarea class="field" id="surveyVolunteerComment" rows="2"></textarea></div>
+        </div>
+
+        <h3 style="margin-top:26px">О текущей деятельности</h3>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>1. Ваша ключевая роль в общественных проектах сегодня (выберите не более 3)</label>
+            <div class="radio-grid" id="surveyRoles" style="grid-template-columns:repeat(2,1fr)">
+              <label class="radio"><input type="checkbox" value="Лидер / руководитель проекта / председатель сообщества"> Лидер / руководитель проекта / председатель сообщества</label>
+              <label class="radio"><input type="checkbox" value="Операционный менеджер / координатор процессов и дедлайнов"> Операционный менеджер / координатор процессов и дедлайнов</label>
+              <label class="radio"><input type="checkbox" value="Генератор идей / креатор / сценарист / дизайнер"> Генератор идей / креатор / сценарист / дизайнер</label>
+              <label class="radio"><input type="checkbox" value="Эксперт-аналитик / технолог / разработчик"> Эксперт-аналитик / технолог / разработчик</label>
+              <label class="radio"><input type="checkbox" value="Коммуникатор / PR / фандрайзинг"> Коммуникатор / PR / фандрайзинг</label>
+              <label class="radio"><input type="checkbox" value="Работа с партнёрами и закупки"> Работа с партнёрами и закупки</label>
+              <label class="radio"><input type="checkbox" value="Не участвую в общественных проектах"> Не участвую в общественных проектах</label>
+            </div>
+            <input class="field" id="surveyRoleOther" placeholder="Другое" style="margin-top:6px">
           </div>
           <div class="form-group full">
-            <label>С каким главным барьером вы сейчас сталкиваетесь?</label>
+            <label>2. Опишите главный результат последних 12 месяцев, которым вы гордитесь (что было сделано, какой измеримый эффект получен)</label>
+            <textarea class="field" id="surveyAchievement" rows="2"></textarea>
+          </div>
+          <div class="form-group full">
+            <label>3. С каким главным внутренним или внешним барьером вы сейчас сталкиваетесь? (один ответ)</label>
             <select class="field" id="surveyBarrier">
               <option value="">Выберите вариант</option>
               <option>Нехватка практических компетенций под реальные задачи</option>
-              <option>«Синдром самозванца» при выходе на серьёзные задачи</option>
-              <option>Дефицит ресурсов (команда, бюджет, площадки)</option>
-              <option>Выгорание от перегрузки</option>
-              <option>Непонимание, куда применить свои навыки</option>
+              <option>«Синдром самозванца» и неуверенность при выходе на серьёзные задачи</option>
+              <option>Дефицит ресурсов (команда, бюджет, оборудование, площадки)</option>
+              <option>Выгорание от перегрузки (работа + общественная деятельность + подработка + семья + учёба)</option>
+              <option>Непонимание, куда применить свои навыки / компетенции / способности в текущем окружении</option>
+              <option>Другое</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Формат идеального социального лифта</label>
+          <div class="form-group full">
+            <label>4. Если вы в ближайшее время добьётесь «успеха» и получите доступ к ресурсам, способным решить важную проблему — какую проблему начнёте решать в первую очередь? Во вторую? В третью? (проблема может быть масштаба планеты или личная / района — по убыванию важности)</label>
+            <input class="field" id="surveyProblem1" placeholder="Проблема №1" style="margin-bottom:6px">
+            <input class="field" id="surveyProblem2" placeholder="Проблема №2" style="margin-bottom:6px">
+            <input class="field" id="surveyProblem3" placeholder="Проблема №3">
+          </div>
+          <div class="form-group full">
+            <label>5. В каком секторе экономики вы видите свой главный карьерный трек? (один ответ)</label>
+            <select class="field" id="surveySector">
+              <option value="">Выберите вариант</option>
+              <option>Реальный сектор / производство / индустрия сервиса и гостеприимства</option>
+              <option>Государственная гражданская служба и институты развития</option>
+              <option>Технологический бизнес / IT / инновации</option>
+              <option>Некоммерческий сектор / благотворительные и социальные фонды</option>
+              <option>Собственный предпринимательский стартап</option>
+              <option>Академическая сфера / наука и преподавание</option>
+            </select>
+          </div>
+          <div class="form-group full"><label>6. Почему вы хотите работать именно в этой сфере?</label><textarea class="field" id="surveyWhySector" rows="2"></textarea></div>
+          <div class="form-group full">
+            <label>7. Формат вашего идеального социального лифта (один ответ)</label>
             <select class="field" id="surveyLiftFormat">
               <option value="">Выберите вариант</option>
-              <option>Скоростной вертикальный лифт</option>
-              <option>Социальный эскалатор</option>
-              <option>Проектный трамплин</option>
-              <option>Дверь в сообщество</option>
+              <option>«Скоростной вертикальный лифт» — быстрый выход на руководящую позицию через победу в федеральном конкурсе</option>
+              <option>«Социальный эскалатор» — пошаговый рост внутри стабильной корпорации или ведомства</option>
+              <option>«Проектный трамплин» — получение гранта / венчурных инвестиций под собственный проект</option>
+              <option>«Дверь в сообщество» — вхождение в пул экспертов и профильную команду наставника</option>
+              <option>Другое</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Какой наставник нужен на текущем этапе</label>
+          <div class="form-group full"><label>8. За какое достижение вас чаще всего хвалили в последнее время?</label><textarea class="field" id="surveyPraised" rows="2"></textarea></div>
+          <div class="form-group full">
+            <label>9. Какие дефициты компетенций вам критично закрыть в ближайшие 6 месяцев? (не более 3)</label>
+            <div class="radio-grid" id="surveyGaps" style="grid-template-columns:repeat(2,1fr)">
+              <label class="radio"><input type="checkbox" value="Управление бюджетом и финансово-экономическое моделирование"> Управление бюджетом и финансово-экономическое моделирование</label>
+              <label class="radio"><input type="checkbox" value="Навыки публичных выступлений и жёстких переговоров"> Навыки публичных выступлений и жёстких переговоров</label>
+              <label class="radio"><input type="checkbox" value="Системное и стратегическое мышление"> Системное и стратегическое мышление (видеть картину целиком)</label>
+              <label class="radio"><input type="checkbox" value="Методологии проектного менеджмента (Agile, Scrum, Lean)"> Методологии проектного менеджмента (Agile, Scrum, Lean)</label>
+              <label class="radio"><input type="checkbox" value="Стресс-менеджмент, жизнестойкость и эмоциональный интеллект"> Стресс-менеджмент, жизнестойкость и эмоциональный интеллект</label>
+              <label class="radio"><input type="checkbox" value="Управление распределённой командой и разрешение конфликтов"> Управление распределённой командой и разрешение конфликтов</label>
+              <label class="radio"><input type="checkbox" value="GR-коммуникации (взаимодействие с органами государственной власти)"> GR-коммуникации (взаимодействие с органами государственной власти)</label>
+            </div>
+            <input class="field" id="surveyGapsOther" placeholder="Другое" style="margin-top:6px">
+          </div>
+          <div class="form-group full"><label>10. Как вы реагируете, когда вашу работу недооценили?</label><textarea class="field" id="surveyUndervalued" rows="2"></textarea></div>
+          <div class="form-group full">
+            <label>11. Какой тип наставника вам необходим на текущем этапе? (один ответ)</label>
             <select class="field" id="surveyMentorType">
               <option value="">Выберите вариант</option>
-              <option>Ментор-эксперт</option>
-              <option>Старший товарищ / фасилитатор</option>
-              <option>Спонсор возможностей</option>
-              <option>Трекер эффективности</option>
+              <option>«Ментор-эксперт» — поможет докрутить технологию и продукт в профессии</option>
+              <option>«Старший товарищ / фасилитатор» — поможет разобраться в себе, ценностях и приоритетах</option>
+              <option>«Спонсор возможностей» — познакомит с рынком, введёт в профильные кабинеты</option>
+              <option>«Трекер эффективности» — будет жёстко требовать результат по дедлайнам и KPI</option>
             </select>
+          </div>
+          <div class="form-group full"><label>12. Что вы сделали за последние два года, чтобы расти профессионально?</label><textarea class="field" id="surveyGrowth" rows="2"></textarea></div>
+          <div class="form-group full">
+            <label>13. В каких форматах работы вы наиболее продуктивны? (не более 3)</label>
+            <div class="radio-grid" id="surveyFormats" style="grid-template-columns:repeat(2,1fr)">
+              <label class="radio"><input type="checkbox" value="Практические выездные интенсивы / экспедиции «на земле»"> Практические выездные интенсивы / экспедиции «на земле»</label>
+              <label class="radio"><input type="checkbox" value="Индивидуальный менторинг и тренировки раз в две недели"> Индивидуальный менторинг и тренировки раз в две недели</label>
+              <label class="radio"><input type="checkbox" value="Хакатоны и кейс-чемпионаты в конкурентной командной среде"> Хакатоны и кейс-чемпионаты в конкурентной командной среде</label>
+              <label class="radio"><input type="checkbox" value="Долгосрочные онлайн-курсы с самостоятельным графиком"> Долгосрочные онлайн-курсы с самостоятельным графиком</label>
+            </div>
+            <input class="field" id="surveyFormatsOther" placeholder="Другое" style="margin-top:6px">
           </div>
         </div>
 
-        <h3 style="margin-top:26px">Углублённые блоки методики</h3>
-        <p class="detail-summary">Валидированные психометрические шкалы — установки, предпочтения в деятельности, смысложизненные ориентации, мотивы изменений, надпрофессиональные мотивы. Полный текст пунктов не публикуется на открытой странице; блоки проходятся в закрытом кабинете эксперта.</p>
-        <div class="question-list" style="margin-top:10px">
-          <article class="question"><b>Блок «Установки» · 40 пар утверждений · ~10 мин</b><p>Жизненные установки и склонность к риску и новизне.</p></article>
-          <article class="question"><b>Блок «Предпочтения в деятельности» · 32 пункта · ~8 мин</b><p>Парные утверждения о стиле работы и принятия решений.</p></article>
-          <article class="question"><b>Блок «Смысложизненные ориентации» · 20 пунктов · ~6 мин</b><p>Целеустремлённость, осмысленность и локус контроля.</p></article>
-          <article class="question"><b>Блок «Мотивы изменений» · 2×30 пунктов · ~12 мин</b><p>Мотивация аффилиации и достижения, уверенность в коммуникации.</p></article>
-          <article class="question"><b>Блок «Надпрофессиональные мотивы» · 23 вопроса · ~10 мин</b><p>Типология трудовой мотивации (методика Герчикова).</p></article>
-        </div>
+        <h3 style="margin-top:26px">Личностные и мотивационные блоки</h3>
+        <p class="detail-summary">Авторский опросник платформы «Проектный лифт» — пять коротких блоков о подходе к работе и мотивации. Не является клинической или аттестационной методикой, не сопоставляется с внешними нормами; результат используется только для подбора задач, наставника и зон развития внутри платформы.</p>
+        <div id="deepBlocksContainer"></div>
       </div>
       <div class="drawer-footer"><button class="btn btn-soft" id="cancelSurvey">Позже</button><button class="btn btn-blue" id="submitSurvey">Сохранить ответы</button></div>
     </aside>
@@ -1941,6 +2048,87 @@
       toast('Профиль обновлён');
     });
 
+    const deepBlocks = [
+      { id: 'novelty', title: 'Блок 1. Отношение к новому', note: 'Как вы относитесь к переменам, неопределённости и незнакомым задачам.', items: [
+        'Я с готовностью берусь за задачи, в которых не всё заранее понятно.',
+        'Привычный, предсказуемый график работы со временем начинает меня тяготить.',
+        'Я скорее соглашусь на проект с неясным результатом, чем останусь при уже знакомой задаче.',
+        'Смена команды, роли или региона вызывает у меня скорее интерес, чем тревогу.',
+        'Мне быстро становится скучно, если в работе долго ничего не меняется.',
+        'Я готов(а) взяться за задачу, даже если успех не гарантирован.',
+        'Общение с людьми из незнакомой профессиональной среды скорее воодушевляет меня.',
+        'Я предпочитаю формат работы с чётким графиком и минимумом неожиданностей.'
+      ], reverse: [7] },
+      { id: 'purpose', title: 'Блок 2. Ясность цели', note: 'Насколько понятны вам собственное движение и накопленный результат.', items: [
+        'Я ясно представляю, к какому результату иду в ближайшие 1–3 года.',
+        'Текущие задачи кажутся мне осмысленными, а не случайным набором дел.',
+        'Я редко задумываюсь, зачем делаю то, что делаю.',
+        'Я мог(ла) бы коротко сформулировать, в чём моя профессиональная цель сейчас.',
+        'Оглядываясь на последний год, я вижу накопленный результат, а не просто занятость.',
+        'Мне сложно назвать три вещи, которыми я горжусь за этот год.',
+        'Я представляю, какой следующий шаг логично сделать после текущей задачи.',
+        'Бывает ощущение, что я топчусь на месте без понятного движения вперёд.'
+      ], reverse: [3, 6, 8] },
+      { id: 'connection', title: 'Блок 3. Стиль взаимодействия', note: 'Предпочитаете ли вы работать с людьми или самостоятельно.', items: [
+        'Мне комфортнее работать в команде, чем в одиночку.',
+        'Я легко завожу разговор с незнакомым человеком по рабочему поводу.',
+        'Сложный вопрос я скорее обсужу с коллегами, чем буду решать его один(одна).',
+        'Отношения в команде важны для меня так же, как и результат.',
+        'Я предпочитаю самостоятельную работу коллективной.',
+        'После насыщенного общения мне нужно время побыть одному(одной), чтобы восстановиться.',
+        'Мне важно, чтобы меня воспринимали как «своего» в команде.',
+        'Я легко поддерживаю контакт с людьми, даже если общаемся нерегулярно.'
+      ], reverse: [5, 6] },
+      { id: 'challenge', title: 'Блок 4. Отношение к сложным задачам', note: 'Что вы выбираете, когда результат не гарантирован.', items: [
+        'Я скорее возьмусь за трудную задачу с риском ошибиться, чем за лёгкую с гарантированным результатом.',
+        'Мне важнее сделать работу как можно лучше, чем просто уложиться в срок.',
+        'Я продолжаю искать решение, даже если первые попытки не удались.',
+        'Соревновательные форматы (конкурсы, рейтинги) скорее мотивируют меня, чем пугают.',
+        'Я предпочитаю задачи, где результат зависит от моих усилий, а не от везения.',
+        'После неудачи я скорее разбираю ошибки и пробую снова, чем переключаюсь на другое.',
+        'Мне интереснее задача, где нет готового шаблона решения.',
+        'Я скорее выберу работу со стабильным, но ограниченным результатом, чем рискованную с большим потенциалом.'
+      ], reverse: [8] }
+    ];
+    const valuesBlock = {
+      id: 'values', title: 'Блок 5. Трудовые ценности',
+      note: 'Выберите по одному варианту в каждом вопросе — это ваш собственный выбор, правильных ответов нет.',
+      questions: [
+        { q: 'Что для вас важнее всего в работе сейчас?', options: ['Понятный и стабильный доход', 'Свобода самому решать, как и что делать', 'Возможность применить и развить профессиональные знания', 'Ощущение, что моя работа приносит пользу людям или стране', 'Признание и статус среди коллег и партнёров'] },
+        { q: 'Как вы предпочитаете, чтобы оценивали вашу работу?', options: ['По чётким измеримым показателям', 'По мнению команды и коллег', 'По итоговому эффекту для людей', 'По моей собственной оценке результата'] },
+        { q: 'Что скорее удержит вас в проекте при трудностях?', options: ['Интерес к самой задаче', 'Ответственность перед командой', 'Договорённость о вознаграждении', 'Уверенность, что это кому-то поможет'] }
+      ]
+    };
+
+    function likertScaleHTML(name) {
+      return `<div class="likert-scale"><small>не согласен</small>${[1,2,3,4,5].map(v=>`<label><input type="radio" name="${name}" value="${v}">${v}</label>`).join('')}<small>согласен</small></div>`;
+    }
+    function renderDeepBlocks() {
+      const host = document.getElementById('deepBlocksContainer');
+      let html = deepBlocks.map(b => `
+        <section class="likert-block">
+          <h4>${esc(b.title)}</h4><p>${esc(b.note)}</p>
+          ${b.items.map((t,i)=>`<div class="likert-row"><span>${i+1}. ${esc(t)}</span>${likertScaleHTML(b.id+'_'+(i+1))}</div>`).join('')}
+        </section>`).join('');
+      html += `<section class="likert-block"><h4>${esc(valuesBlock.title)}</h4><p>${esc(valuesBlock.note)}</p>
+        ${valuesBlock.questions.map((q,i)=>`<div style="margin-top:10px"><label style="font-size:13px;font-weight:700">${i+1}. ${esc(q.q)}</label><div class="mc-group">${q.options.map((o,j)=>`<label class="radio"><input type="radio" name="values_${i+1}" value="${esc(o)}"> ${esc(o)}</label>`).join('')}</div></div>`).join('')}
+      </section>`;
+      host.innerHTML = html;
+    }
+    renderDeepBlocks();
+
+    function scoreDeepBlock(block) {
+      const vals = block.items.map((_, i) => {
+        const checked = document.querySelector(`input[name="${block.id}_${i+1}"]:checked`);
+        if (!checked) return null;
+        let v = Number(checked.value);
+        if (block.reverse.includes(i+1)) v = 6 - v;
+        return v;
+      }).filter(v => v !== null);
+      if (!vals.length) return null;
+      return vals.reduce((a,b)=>a+b,0) / vals.length;
+    }
+
     function openSurvey() {
       const d = document.getElementById('surveyDrawer');
       d.classList.add('open'); d.setAttribute('aria-hidden', 'false');
@@ -1952,16 +2140,95 @@
     document.getElementById('closeSurvey').addEventListener('click', closeSurvey);
     document.getElementById('cancelSurvey').addEventListener('click', closeSurvey);
     document.getElementById('surveyDrawer').addEventListener('click', e => { if (e.target === e.currentTarget) closeSurvey(); });
+    const MENTOR_TYPE_LABEL = {
+      'Ментор-эксперт': 'ментор-эксперт — поможет докрутить технологию и продукт в профессии',
+      'Старший товарищ / фасилитатор': 'старший товарищ / фасилитатор — поможет разобраться в себе и приоритетах',
+      'Спонсор возможностей': 'спонсор возможностей — познакомит с рынком и профильными кабинетами',
+      'Трекер эффективности': 'трекер эффективности — потребует результат по дедлайнам и KPI'
+    };
+    const GAP_TASK_HINT = {
+      'Управление бюджетом и финансово-экономическое моделирование': 'задачи с финансовым моделированием в банке задач',
+      'Навыки публичных выступлений и жёстких переговоров': 'кейс-сессии с ЛПР через Карту точек контакта',
+      'Системное и стратегическое мышление': 'задачи федерального уровня со сложной постановкой',
+      'Методологии проектного менеджмента (Agile, Scrum, Lean)': 'роль руководителя проекта в активной команде',
+      'Стресс-менеджмент, жизнестойкость и эмоциональный интеллект': 'наставника формата «старший товарищ / фасилитатор»',
+      'Управление распределённой командой и разрешение конфликтов': 'проекты с командой от 4 человек',
+      'GR-коммуникации (взаимодействие с органами государственной власти)': 'задачи от ФОИВ/РОИВ с прямым взаимодействием с заказчиком'
+    };
+
+    function buildRecommendations(d) {
+      const list = [];
+      if (d.barrier) list.push(`Главный барьер — «${d.barrier}». Зона развития обновлена в профиле потенциала.`);
+      d.gaps.forEach(g => { if (GAP_TASK_HINT[g]) list.push(`Для «${g.split(' (')[0]}» — ${GAP_TASK_HINT[g]}.`); });
+      if (d.mentorType && MENTOR_TYPE_LABEL[d.mentorType]) list.push(`Рекомендованный тип наставника: ${MENTOR_TYPE_LABEL[d.mentorType]}.`);
+      if (d.liftFormat) list.push(`Формат лифта, который вам ближе: ${d.liftFormat.split(' — ')[0]}.`);
+      if (!list.length) list.push('Заполните барьер и дефициты компетенций — тогда появятся персональные рекомендации.');
+      return list;
+    }
+
+    function openMailDraft(d, recs) {
+      const subject = 'Результаты аудита потенциала — Проектный лифт';
+      const lines = [
+        'Результаты аудита потенциала и дефицитов',
+        '',
+        'Рекомендации:',
+        ...recs.map(r => '— ' + r),
+        '',
+        'Ответы по текущей деятельности:',
+        d.achievement ? `Главный результат: ${d.achievement}` : '',
+        d.barrier ? `Барьер: ${d.barrier}` : '',
+        d.sector ? `Карьерный трек: ${d.sector}` : '',
+        d.liftFormat ? `Формат лифта: ${d.liftFormat}` : '',
+        d.mentorType ? `Тип наставника: ${d.mentorType}` : ''
+      ].filter(Boolean).join('\n');
+      const mailto = `mailto:${encodeURIComponent(d.email || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines)}`;
+      window.location.href = mailto;
+    }
+
     document.getElementById('submitSurvey').addEventListener('click', () => {
       const roles = [...document.querySelectorAll('#surveyRoles input:checked')].map(i => i.value);
-      if (roles.length > 3) { toast('Выберите не более трёх ролей'); return; }
-      const barrier = document.getElementById('surveyBarrier').value;
-      if (barrier) {
-        document.getElementById('developmentNote').innerHTML = `<strong>Зона развития:</strong> ${esc(barrier)}. Отмечено в аудите потенциала.`;
+      if (roles.length > 3) { toast('В вопросе 1 выберите не более трёх ролей'); return; }
+      const gaps = [...document.querySelectorAll('#surveyGaps input:checked')].map(i => i.value);
+      if (gaps.length > 3) { toast('В вопросе 9 выберите не более трёх дефицитов'); return; }
+      const formats = [...document.querySelectorAll('#surveyFormats input:checked')].map(i => i.value);
+      if (formats.length > 3) { toast('В вопросе 13 выберите не более трёх форматов'); return; }
+
+      const val = id => document.getElementById(id).value.trim();
+      const checked = name => document.querySelector(`input[name="${name}"]:checked`)?.value || '';
+
+      const data = {
+        email: val('surveyEmail'), age: val('surveyAge'), gender: checked('gender'),
+        economicStatus: val('surveyEconomicStatus'), regalia: val('surveyRegalia'),
+        experience: val('surveyExperience'), position: val('surveyPosition'), workplace: val('surveyWorkplace'),
+        volunteer: checked('volunteer'), volunteerComment: val('surveyVolunteerComment'),
+        roles, roleOther: val('surveyRoleOther'), achievement: val('surveyAchievement'),
+        barrier: val('surveyBarrier'), problems: [val('surveyProblem1'), val('surveyProblem2'), val('surveyProblem3')].filter(Boolean),
+        sector: val('surveySector'), whySector: val('surveyWhySector'), liftFormat: val('surveyLiftFormat'),
+        praised: val('surveyPraised'), gaps, gapsOther: val('surveyGapsOther'), undervalued: val('surveyUndervalued'),
+        mentorType: val('surveyMentorType'), growth: val('surveyGrowth'), formats, formatsOther: val('surveyFormatsOther')
+      };
+
+      if (data.barrier) {
+        document.getElementById('developmentNote').innerHTML = `<strong>Зона развития:</strong> ${esc(data.barrier)}. Отмечено в аудите потенциала.`;
       }
       document.getElementById('auditUpdatedTag').textContent = 'Аудит обновлён только что';
+
+      const scoreMap = { purpose: 'scorePurpose', challenge: 'scoreChallenge', connection: 'scoreConnection' };
+      deepBlocks.forEach(b => {
+        const avg = scoreDeepBlock(b);
+        if (avg === null || !scoreMap[b.id]) return;
+        const pct = Math.round((avg - 1) / 4 * 100);
+        document.getElementById(scoreMap[b.id] + 'Val').textContent = pct + '%';
+        document.getElementById(scoreMap[b.id] + 'Bar').style.width = pct + '%';
+      });
+
+      const recs = buildRecommendations(data);
+      document.getElementById('recommendationsList').innerHTML = recs.map(r => `<li>${esc(r)}</li>`).join('');
+      document.getElementById('recommendationsBlock').hidden = false;
+      document.getElementById('emailRecommendations').onclick = () => openMailDraft(data, recs);
+
       closeSurvey();
-      toast('Ответы сохранены — профиль потенциала обновится после обработки');
+      toast(data.email ? 'Ответы сохранены — рекомендации доступны в профиле и готовы к отправке на почту' : 'Ответы сохранены — рекомендации доступны в профиле потенциала');
     });
 
     renderExpertProfile();
